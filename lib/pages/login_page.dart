@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'home_page.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -30,10 +32,10 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
         // Exemplo: Navegar para uma tela inicial (HomePage)
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const HomePage()),
-        // );
+         Navigator.pushReplacement(
+           context,
+           MaterialPageRoute(builder: (context) => const HomePage()),
+         );
       } else {
         // Credenciais incorretas
         showDialog(
