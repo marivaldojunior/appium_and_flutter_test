@@ -1,3 +1,4 @@
+import 'package:appium_and_flutter_test/pages/recursos_page.dart';
 import 'package:flutter/material.dart';
 
 import 'forms_page.dart';
@@ -80,8 +81,7 @@ class HomePage extends StatelessWidget {
               Icons.smartphone, // Ícone para Recursos Nativos
                   () {
                 // Navegar para a página de Recursos Nativos
-                // Exemplo:
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => const NativeFeaturesPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const RecursosPage()));
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Navegar para Recursos Nativos')),
                 );

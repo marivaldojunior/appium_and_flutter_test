@@ -1,8 +1,22 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"
+        tools:targetApi="5" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"
+        tools:targetApi="4" /> <!-- Para Android 12 (API 32) e inferior -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Para Android 13 (API 33) e superior -->
+    <!-- Se você precisar gravar no armazenamento externo (geralmente não é necessário para apenas pegar imagens) -->
+    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" /> -->
+
     <application
-        android:label="appium_and_flutter_test"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:label="seu_app">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,12 +44,13 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-    </application>
+       </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
