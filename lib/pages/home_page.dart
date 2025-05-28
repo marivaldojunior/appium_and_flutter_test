@@ -1,3 +1,4 @@
+import 'package:appium_and_flutter_test/pages/click_page.dart';
 import 'package:appium_and_flutter_test/pages/recursos_page.dart';
 import 'package:flutter/material.dart';
 import 'forms_page.dart';
@@ -86,6 +87,17 @@ class HomePage extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => const GestosPage()),
                 );
+              },
+            ),
+            _buildGridButton(
+              context,
+              'Clicar e Segurar',
+              Icons.touch_app,
+                  () {
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ClickPage()),
+                  );
               },
             ),
             // Você pode adicionar mais botões aqui, se necessário
