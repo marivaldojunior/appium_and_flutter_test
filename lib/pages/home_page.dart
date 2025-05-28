@@ -1,6 +1,7 @@
 import 'package:appium_and_flutter_test/pages/click_page.dart';
 import 'package:appium_and_flutter_test/pages/recursos_page.dart';
 import 'package:flutter/material.dart';
+import 'chat_page.dart';
 import 'forms_page.dart';
 import 'gestos_page.dart';
 import 'listview_page.dart';
@@ -98,6 +99,17 @@ class HomePage extends StatelessWidget {
                     context,
                     MaterialPageRoute(builder: (context) => const ClickPage()),
                   );
+              },
+            ),
+            _buildGridButton( // ou qualquer outro botão/trigger
+              context,
+              'Chat Simulado',
+              Icons.chat_bubble_outline,
+                  () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ChatPage()),
+                );
               },
             ),
             // Você pode adicionar mais botões aqui, se necessário

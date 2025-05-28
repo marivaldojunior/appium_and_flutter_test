@@ -12,7 +12,10 @@
     <!-- Para Android 13 (API 33) e superior -->
     <!-- Se você precisar gravar no armazenamento externo (geralmente não é necessário para apenas pegar imagens) -->
     <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" /> -->
-
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Se você for gravar em armazenamento externo (menos comum com escopo de armazenamento) -->
+    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
+    <!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> -->
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
