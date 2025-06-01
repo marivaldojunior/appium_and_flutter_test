@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key}); // A key do construtor principal já está aqui.
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginPage> createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -17,39 +17,48 @@ class _LoginPageState extends State<LoginPage> {
   final String _defaultUsername = 'admin';
   final String _defaultPassword = '1234';
 
+  // --- Keys para Testes ---
+  static const Key usernameFieldKey = ValueKey('login_username_field');
+  static const Key passwordFieldKey = ValueKey('login_password_field');
+  static const Key loginButtonKey = ValueKey('login_button');
+  static const Key forgotPasswordButtonKey = ValueKey('login_forgot_password_button');
+  static const Key alertDialogErrorOkButtonKey = ValueKey('login_alert_error_ok_button');
+  // --- Fim das Keys para Testes ---
+
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // Formulário é válido, verificar credenciais
       if (_usernameController.text == _defaultUsername &&
           _passwordController.text == _defaultPassword) {
-        // Credenciais corretas - Navegue para a próxima tela ou mostre sucesso
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login bem-sucedido!',
-            style: TextStyle(
-                color: Colors.white),
-            ),
+          const SnackBar(
+            key: ValueKey('login_snackbar_success'), // Key para o SnackBar
+            content: Text('Login bem-sucedido!',
+                style: TextStyle(color: Colors.white)),
             backgroundColor: Colors.lightGreen,
           ),
         );
-        // Exemplo: Navegar para uma tela inicial (HomePage)
-         Navigator.pushReplacement(
-           context,
-           MaterialPageRoute(builder: (context) => const HomePage()),
-         );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       } else {
-        // Credenciais incorretas
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
+              key: const ValueKey('login_alert_error'), // Key para o AlertDialog
               title: const Text('Erro de Login'),
               content: const Text('Usuário ou senha incorretos.'),
               actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Fecha o diálogo
-                  },
+                Tooltip(
+                  message: 'Confirmar erro de login', // Mensagem do Tooltip
+                  child: TextButton(
+                    key: alertDialogErrorOkButtonKey, // Usar a const definida acima
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ),
               ],
             );
@@ -70,28 +79,33 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Login'), // O texto aqui já serve como uma boa referência semântica
         centerTitle: true,
       ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
-            key: _formKey,
+            key: _formKey, // GlobalKey para o Form, útil para validação
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                // Logos sobrepostos
                 Column(
                   children: <Widget>[
-                    Image.asset(
-                      'assets/images/appium_logo.png',
-                      height: 45,
+                    Semantics(
+                      label: 'Logotipo Appium', // Label para acessibilidade
+                      child: Image.asset(
+                        'assets/images/appium_logo.png',
+                        height: 45,
+                      ),
                     ),
-                    Image.asset(
-                      'assets/images/flutter_logo.png',
-                      height: 45,
+                    Semantics(
+                      label: 'Logotipo Flutter', // Label para acessibilidade
+                      child: Image.asset(
+                        'assets/images/flutter_logo.png',
+                        height: 45,
+                      ),
                     ),
                   ],
                 ),
@@ -99,9 +113,10 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Campo de Usuário
                 TextFormField(
+                  key: usernameFieldKey, // Key para teste
                   controller: _usernameController,
                   decoration: const InputDecoration(
-                    labelText: 'Usuário',
+                    labelText: 'Usuário', // Bom para semântica e Appium
                     hintText: 'Digite seu usuário',
                     prefixIcon: Icon(Icons.person_outline),
                     border: OutlineInputBorder(),
@@ -117,14 +132,15 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Campo de Senha
                 TextFormField(
+                  key: passwordFieldKey, // Key para teste
                   controller: _passwordController,
                   decoration: const InputDecoration(
-                    labelText: 'Senha',
+                    labelText: 'Senha', // Bom para semântica e Appium
                     hintText: 'Digite sua senha',
                     prefixIcon: Icon(Icons.lock_outline),
                     border: OutlineInputBorder(),
                   ),
-                  obscureText: true, // Esconde a senha
+                  obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Por favor, insira a senha';
@@ -136,29 +152,38 @@ class _LoginPageState extends State<LoginPage> {
 
                 // Botão de Login
                 ElevatedButton(
+                  key: loginButtonKey, // Key para teste
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     textStyle: const TextStyle(fontSize: 18),
                   ),
                   onPressed: _login,
-                  child: const Text('Entrar',
+                  // O child Text('Entrar') já é um bom identificador semântico para Appium.
+                  child: const Text(
+                    'Entrar',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 16.0),
 
-                // Link para "Esqueceu a senha?" (Opcional)
-                TextButton(
-                  onPressed: () {
-                    // Lógica para esqueceu a senha
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Funcionalidade "Esqueceu a senha?" não implementada.')),
-                    );
-                  },
-                  child: const Text('Esqueceu a senha?'),
+                // Link para "Esqueceu a senha?"
+                Tooltip(
+                  message: 'Recuperar senha esquecida', // Mensagem do Tooltip
+                  child: TextButton(
+                    key: forgotPasswordButtonKey,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          key: ValueKey('login_snackbar_forgot_password_info'),
+                          content: Text(
+                              'Funcionalidade "Esqueceu a senha?" não implementada.'),
+                        ),
+                      );
+                    },
+                    child: const Text('Esqueceu a senha?'),
+                  ),
                 ),
               ],
             ),
