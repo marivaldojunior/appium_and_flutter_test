@@ -26,9 +26,7 @@ class ClickPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Interações de Clique'),
-      ),
+      appBar: AppBar(title: const Text('Interações de Clique')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -60,7 +58,10 @@ class ClickPage extends StatelessWidget {
                       const SizedBox(height: 16.0),
                       const Text(
                         'Card de Duplo Clique',
-                        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8.0),
@@ -75,7 +76,6 @@ class ClickPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 32.0), // Espaçamento entre os cards
-
             // Card para Clique Longo
             GestureDetector(
               onLongPress: () {
@@ -101,7 +101,10 @@ class ClickPage extends StatelessWidget {
                       const SizedBox(height: 16.0),
                       const Text(
                         'Card de Clique Longo',
-                        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8.0),

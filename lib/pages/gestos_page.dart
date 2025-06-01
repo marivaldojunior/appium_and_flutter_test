@@ -34,7 +34,11 @@ class SignaturePainter extends CustomPainter {
           canvas.drawLine(p1, p2, line.paint);
         }
         if (line.points.length == 1) {
-          canvas.drawCircle(line.points.first, line.paint.strokeWidth / 2, line.paint);
+          canvas.drawCircle(
+            line.points.first,
+            line.paint.strokeWidth / 2,
+            line.paint,
+          );
         }
       }
     }
@@ -80,57 +84,63 @@ class _GestosPageState extends State<GestosPage> {
         ],
       ),
       body: SafeArea(
-          child: Column(
-        children: [
-          // Área de Desenho Refatorada
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque, // Mantém, é importante
-              onPanStart: (details) {
-                setState(() {
-                  _drawingLines = List.from(_drawingLines)
-                    ..add(
-                      DrawingPoint(
-                        points: [details.localPosition],
-                        paint: Paint()
-                          ..color = _selectedColor
-                          ..strokeWidth = _strokeWidth
-                          ..strokeCap = StrokeCap.round
-                          ..style = PaintingStyle.stroke,
-                      ),
-                    );
-                });
-              },
-              onPanUpdate: (details) {
-                if (_drawingLines.isNotEmpty && _drawingLines.last != null) {
+        child: Column(
+          children: [
+            // Área de Desenho Refatorada
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque, // Mantém, é importante
+                onPanStart: (details) {
                   setState(() {
-                    DrawingPoint lastLine = _drawingLines.last!;
-                    List<Offset> updatedPoints = List.from(lastLine.points)..add(details.localPosition);
-                    DrawingPoint updatedLastLine = DrawingPoint(points: updatedPoints, paint: lastLine.paint);
-                    _drawingLines = List.from(_drawingLines.sublist(0, _drawingLines.length - 1))
-                      ..add(updatedLastLine);
+                    _drawingLines = List.from(_drawingLines)
+                      ..add(
+                        DrawingPoint(
+                          points: [details.localPosition],
+                          paint: Paint()
+                            ..color = _selectedColor
+                            ..strokeWidth = _strokeWidth
+                            ..strokeCap = StrokeCap.round
+                            ..style = PaintingStyle.stroke,
+                        ),
+                      );
                   });
-                }
-              },
-              onPanEnd: (details) {
-                // Nenhum comportamento especial no final do traço por enquanto
-              },
-              child: CustomPaint(
-                painter: SignaturePainter(lines: _drawingLines),
-                // O child do CustomPaint define a área que ele tentará cobrir.
-                // Usar um Container com constraints.expand() garante que ele preencha o Expanded.
-                // A cor foi removida para garantir que o CustomPaint desenhe "direto" no que está abaixo.
-                child: Container(
-                  constraints: const BoxConstraints.expand(),
-                  // REMOVIDO: color: Colors.grey[200],
+                },
+                onPanUpdate: (details) {
+                  if (_drawingLines.isNotEmpty && _drawingLines.last != null) {
+                    setState(() {
+                      DrawingPoint lastLine = _drawingLines.last!;
+                      List<Offset> updatedPoints = List.from(lastLine.points)
+                        ..add(details.localPosition);
+                      DrawingPoint updatedLastLine = DrawingPoint(
+                        points: updatedPoints,
+                        paint: lastLine.paint,
+                      );
+                      _drawingLines = List.from(
+                        _drawingLines.sublist(0, _drawingLines.length - 1),
+                      )..add(updatedLastLine);
+                    });
+                  }
+                },
+                onPanEnd: (details) {
+                  // Nenhum comportamento especial no final do traço por enquanto
+                },
+                child: CustomPaint(
+                  painter: SignaturePainter(lines: _drawingLines),
+                  // O child do CustomPaint define a área que ele tentará cobrir.
+                  // Usar um Container com constraints.expand() garante que ele preencha o Expanded.
+                  // A cor foi removida para garantir que o CustomPaint desenhe "direto" no que está abaixo.
+                  child: Container(
+                    constraints: const BoxConstraints.expand(),
+                    // REMOVIDO: color: Colors.grey[200],
+                  ),
                 ),
               ),
             ),
-          ),
-          // Controles de Desenho
-          _buildDrawingControls(),
-        ],
-      )),
+            // Controles de Desenho
+            _buildDrawingControls(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -145,11 +155,26 @@ class _GestosPageState extends State<GestosPage> {
             child: DropdownButton<Color>(
               value: _selectedColor,
               items: [
-                DropdownMenuItem(value: Colors.black, child: _buildColorSwatch(Colors.black)),
-                DropdownMenuItem(value: Colors.red, child: _buildColorSwatch(Colors.red)),
-                DropdownMenuItem(value: Colors.green, child: _buildColorSwatch(Colors.green)),
-                DropdownMenuItem(value: Colors.blue, child: _buildColorSwatch(Colors.blue)),
-                DropdownMenuItem(value: Colors.yellow, child: _buildColorSwatch(Colors.yellow)),
+                DropdownMenuItem(
+                  value: Colors.black,
+                  child: _buildColorSwatch(Colors.black),
+                ),
+                DropdownMenuItem(
+                  value: Colors.red,
+                  child: _buildColorSwatch(Colors.red),
+                ),
+                DropdownMenuItem(
+                  value: Colors.green,
+                  child: _buildColorSwatch(Colors.green),
+                ),
+                DropdownMenuItem(
+                  value: Colors.blue,
+                  child: _buildColorSwatch(Colors.blue),
+                ),
+                DropdownMenuItem(
+                  value: Colors.yellow,
+                  child: _buildColorSwatch(Colors.yellow),
+                ),
               ],
               onChanged: (Color? newColor) {
                 if (newColor != null) {
@@ -196,7 +221,9 @@ class _GestosPageState extends State<GestosPage> {
         color: color,
         shape: BoxShape.circle,
         border: Border.all(
-          color: _selectedColor == color ? Theme.of(context).colorScheme.outline : Colors.transparent,
+          color: _selectedColor == color
+              ? Theme.of(context).colorScheme.outline
+              : Colors.transparent,
           width: 2,
         ),
       ),

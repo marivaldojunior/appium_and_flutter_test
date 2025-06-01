@@ -9,7 +9,9 @@ void main() {
 
   testWidgets('Login bem-sucedido', (WidgetTester tester) async {
     // app.main(); // Se estiver iniciando o app a partir do main
-    await tester.pumpWidget(MaterialApp(home: LoginPage())); // Ou inicie a LoginPage diretamente
+    await tester.pumpWidget(
+      MaterialApp(home: LoginPage()),
+    ); // Ou inicie a LoginPage diretamente
     await tester.pumpAndSettle();
 
     // Encontrar campos e botão pelas keys
@@ -32,18 +34,26 @@ void main() {
 
     // Verificar o SnackBar de sucesso (se a navegação não for imediata)
     // ou verificar se navegou para a HomePage.
-    expect(find.byKey(const ValueKey('login_snackbar_success')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('login_snackbar_success')),
+      findsOneWidget,
+    );
     expect(find.text('Login bem-sucedido!'), findsOneWidget);
 
     // Se você navegar para HomePage, verifique um elemento da HomePage
     // expect(find.byType(HomePage), findsOneWidget);
   });
 
-  testWidgets('Erro de login com credenciais incorretas', (WidgetTester tester) async {
+  testWidgets('Erro de login com credenciais incorretas', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(MaterialApp(home: LoginPage()));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byKey(LoginPageState.usernameFieldKey), 'errado');
+    await tester.enterText(
+      find.byKey(LoginPageState.usernameFieldKey),
+      'errado',
+    );
     await tester.enterText(find.byKey(LoginPageState.passwordFieldKey), '123');
     await tester.tap(find.byKey(LoginPageState.loginButtonKey));
     await tester.pumpAndSettle(); // Esperar pelo AlertDialog

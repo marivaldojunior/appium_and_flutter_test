@@ -19,7 +19,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="seu_app">
+        android:label="appium_flutter_app">
         <activity
             android:name=".MainActivity"
             android:exported="true"

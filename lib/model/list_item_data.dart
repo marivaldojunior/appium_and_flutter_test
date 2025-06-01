@@ -11,7 +11,9 @@ class ListItemData {
     this.description,
     this.isCompleted = false,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now(); // Define um valor padrão se não fornecido
+  }) : createdAt =
+           createdAt ??
+           DateTime.now(); // Define um valor padrão se não fornecido
 
   // Você pode adicionar métodos aqui, como copyWith para facilitar a edição
   ListItemData copyWith({
@@ -31,8 +33,10 @@ class ListItemData {
   }
 
   @override
-  bool operator ==(Object other) => // Necessário se você quiser comparar objetos
-  identical(this, other) ||
+  bool operator ==(
+    Object other,
+  ) => // Necessário se você quiser comparar objetos
+      identical(this, other) ||
       other is ListItemData &&
           runtimeType == other.runtimeType &&
           id == other.id;

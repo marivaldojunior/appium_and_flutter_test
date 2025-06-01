@@ -9,7 +9,12 @@ import 'listview_page.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  Widget _buildGridButton(BuildContext context, String title, IconData icon, VoidCallback onPressed) {
+  Widget _buildGridButton(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: InkWell(
@@ -35,10 +40,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Menu Principal'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Menu Principal'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(5.0),
         child: GridView.count(
@@ -46,66 +48,51 @@ class HomePage extends StatelessWidget {
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
           children: <Widget>[
+            _buildGridButton(context, 'Formulários', Icons.description, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FormsPage()),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Navegar para Formulários')),
+              );
+            }),
+            _buildGridButton(context, 'ListView', Icons.list_alt, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ListViewPage()),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Navegar para ListView')),
+              );
+            }),
+            _buildGridButton(context, 'Recursos Nativos', Icons.smartphone, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const RecursosPage()),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Navegar para Recursos Nativos')),
+              );
+            }),
+            _buildGridButton(context, 'Gestos na Tela', Icons.gesture, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const GestosPage()),
+              );
+            }),
+            _buildGridButton(context, 'Clicar e Segurar', Icons.touch_app, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ClickPage()),
+              );
+            }),
             _buildGridButton(
-              context,
-              'Formulários',
-              Icons.description,
-                  () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const FormsPage()));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Navegar para Formulários')),
-                );
-              },
-            ),
-            _buildGridButton(
-              context,
-              'ListView',
-              Icons.list_alt,
-                  () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ListViewPage()));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Navegar para ListView')),
-                );
-              },
-            ),
-            _buildGridButton(
-              context,
-              'Recursos Nativos',
-              Icons.smartphone,
-                  () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const RecursosPage()));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Navegar para Recursos Nativos')),
-                );
-              },
-            ),
-            _buildGridButton(
-              context,
-              'Gestos na Tela',
-              Icons.gesture,
-                  () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GestosPage()),
-                );
-              },
-            ),
-            _buildGridButton(
-              context,
-              'Clicar e Segurar',
-              Icons.touch_app,
-                  () {
-                    Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ClickPage()),
-                  );
-              },
-            ),
-            _buildGridButton( // ou qualquer outro botão/trigger
+              // ou qualquer outro botão/trigger
               context,
               'Chat Simulado',
               Icons.chat_bubble_outline,
-                  () {
+              () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ChatPage()),

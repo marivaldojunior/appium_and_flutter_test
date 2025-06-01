@@ -21,8 +21,12 @@ class LoginPageState extends State<LoginPage> {
   static const Key usernameFieldKey = ValueKey('login_username_field');
   static const Key passwordFieldKey = ValueKey('login_password_field');
   static const Key loginButtonKey = ValueKey('login_button');
-  static const Key forgotPasswordButtonKey = ValueKey('login_forgot_password_button');
-  static const Key alertDialogErrorOkButtonKey = ValueKey('login_alert_error_ok_button');
+  static const Key forgotPasswordButtonKey = ValueKey(
+    'login_forgot_password_button',
+  );
+  static const Key alertDialogErrorOkButtonKey = ValueKey(
+    'login_alert_error_ok_button',
+  );
   // --- Fim das Keys para Testes ---
 
   void _login() {
@@ -32,8 +36,10 @@ class LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             key: ValueKey('login_snackbar_success'), // Key para o SnackBar
-            content: Text('Login bem-sucedido!',
-                style: TextStyle(color: Colors.white)),
+            content: Text(
+              'Login bem-sucedido!',
+              style: TextStyle(color: Colors.white),
+            ),
             backgroundColor: Colors.lightGreen,
           ),
         );
@@ -46,14 +52,17 @@ class LoginPageState extends State<LoginPage> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              key: const ValueKey('login_alert_error'), // Key para o AlertDialog
+              key: const ValueKey(
+                'login_alert_error',
+              ), // Key para o AlertDialog
               title: const Text('Erro de Login'),
               content: const Text('Usuário ou senha incorretos.'),
               actions: <Widget>[
                 Tooltip(
                   message: 'Confirmar erro de login', // Mensagem do Tooltip
                   child: TextButton(
-                    key: alertDialogErrorOkButtonKey, // Usar a const definida acima
+                    key:
+                        alertDialogErrorOkButtonKey, // Usar a const definida acima
                     child: const Text('OK'),
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -79,7 +88,9 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'), // O texto aqui já serve como uma boa referência semântica
+        title: const Text(
+          'Login',
+        ), // O texto aqui já serve como uma boa referência semântica
         centerTitle: true,
       ),
       body: Center(
@@ -163,7 +174,9 @@ class LoginPageState extends State<LoginPage> {
                   child: const Text(
                     'Entrar',
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16.0),
@@ -178,7 +191,8 @@ class LoginPageState extends State<LoginPage> {
                         const SnackBar(
                           key: ValueKey('login_snackbar_forgot_password_info'),
                           content: Text(
-                              'Funcionalidade "Esqueceu a senha?" não implementada.'),
+                            'Funcionalidade "Esqueceu a senha?" não implementada.',
+                          ),
                         ),
                       );
                     },

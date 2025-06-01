@@ -10,7 +10,8 @@ class RecursosPage extends StatefulWidget {
 }
 
 class _RecursosPageState extends State<RecursosPage> {
-  File? _imageFile; // Variável para armazenar o arquivo da imagem selecionada/tirada
+  File?
+  _imageFile; // Variável para armazenar o arquivo da imagem selecionada/tirada
   final ImagePicker _picker = ImagePicker(); // Instância do ImagePicker
 
   // Função genérica para pegar imagem
@@ -28,16 +29,28 @@ class _RecursosPageState extends State<RecursosPage> {
           _imageFile = File(pickedFile.path);
         });
       } else {
-        if (mounted) { // Verifica se o widget ainda está na árvore
+        if (mounted) {
+          // Verifica se o widget ainda está na árvore
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(source == ImageSource.camera ? 'Nenhuma imagem tirada.' : 'Nenhuma imagem selecionada.')),
+            SnackBar(
+              content: Text(
+                source == ImageSource.camera
+                    ? 'Nenhuma imagem tirada.'
+                    : 'Nenhuma imagem selecionada.',
+              ),
+            ),
           );
         }
       }
     } catch (e) {
-      if (mounted) { // Verifica se o widget ainda está na árvore
+      if (mounted) {
+        // Verifica se o widget ainda está na árvore
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao acessar ${source == ImageSource.camera ? "câmera" : "galeria"}: $e')),
+          SnackBar(
+            content: Text(
+              'Erro ao acessar ${source == ImageSource.camera ? "câmera" : "galeria"}: $e',
+            ),
+          ),
         );
       }
     }
@@ -73,15 +86,13 @@ class _RecursosPageState extends State<RecursosPage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Câmera e Galeria'),
-      ),
+      appBar: AppBar(title: const Text('Câmera e Galeria')),
       body: Center(
-        child: SingleChildScrollView( // Para o caso da imagem ser grande ou a tela pequena
+        child: SingleChildScrollView(
+          // Para o caso da imagem ser grande ou a tela pequena
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -98,26 +109,35 @@ class _RecursosPageState extends State<RecursosPage> {
                 alignment: Alignment.center,
                 child: _imageFile == null
                     ? const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.image_search, size: 60, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text(
-                      'Nenhuma imagem selecionada',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                )
-                    : ClipRRect( // Para garantir que a imagem respeite o borderRadius do container
-                  borderRadius: BorderRadius.circular(7.0), // Um pouco menor que o container
-                  child: Image.file(
-                    _imageFile!,
-                    fit: BoxFit.cover, // Para cobrir a área do container
-                    width: double.infinity, // Para ocupar toda a largura do container
-                    height: double.infinity, // Para ocupar toda a altura do container
-                  ),
-                ),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.image_search,
+                            size: 60,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Nenhuma imagem selecionada',
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      )
+                    : ClipRRect(
+                        // Para garantir que a imagem respeite o borderRadius do container
+                        borderRadius: BorderRadius.circular(
+                          7.0,
+                        ), // Um pouco menor que o container
+                        child: Image.file(
+                          _imageFile!,
+                          fit: BoxFit.cover, // Para cobrir a área do container
+                          width: double
+                              .infinity, // Para ocupar toda a largura do container
+                          height: double
+                              .infinity, // Para ocupar toda a altura do container
+                        ),
+                      ),
               ),
               const SizedBox(height: 24.0),
 
@@ -149,7 +169,10 @@ class _RecursosPageState extends State<RecursosPage> {
               if (_imageFile != null)
                 TextButton.icon(
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  label: const Text('Remover Imagem', style: TextStyle(color: Colors.red)),
+                  label: const Text(
+                    'Remover Imagem',
+                    style: TextStyle(color: Colors.red),
+                  ),
                   onPressed: () {
                     setState(() {
                       _imageFile = null;

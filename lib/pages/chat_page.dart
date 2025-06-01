@@ -35,7 +35,6 @@ class _ChatPageState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
   final Random _random = Random();
 
-
   @override
   void initState() {
     super.initState();
@@ -46,16 +45,33 @@ class _ChatPageState extends State<ChatPage> {
   void _addInitialMessages() {
     setState(() {
       _messages.addAll([
-        Message(id: _generateId(), text: "Olá! Como você está?", type: MessageType.text, isSender: false),
-        Message(id: _generateId(), text: "Estou bem, obrigado! E você?", type: MessageType.text, isSender: true),
-        Message(id: _generateId(), text: "Ouça isso!", type: MessageType.audio, isSender: false, audioDuration: Duration(seconds: _random.nextInt(50) + 10)),
+        Message(
+          id: _generateId(),
+          text: "Olá! Como você está?",
+          type: MessageType.text,
+          isSender: false,
+        ),
+        Message(
+          id: _generateId(),
+          text: "Estou bem, obrigado! E você?",
+          type: MessageType.text,
+          isSender: true,
+        ),
+        Message(
+          id: _generateId(),
+          text: "Ouça isso!",
+          type: MessageType.audio,
+          isSender: false,
+          audioDuration: Duration(seconds: _random.nextInt(50) + 10),
+        ),
       ]);
     });
     _scrollToBottom();
   }
 
   String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString() + _random.nextInt(1000).toString();
+    return DateTime.now().millisecondsSinceEpoch.toString() +
+        _random.nextInt(1000).toString();
   }
 
   void _sendMessage() {
@@ -82,13 +98,14 @@ class _ChatPageState extends State<ChatPage> {
       text: "Mensagem de áudio", // Placeholder
       type: MessageType.audio,
       isSender: true,
-      audioDuration: Duration(seconds: _random.nextInt(50) + 10), // Duração aleatória de 10-60s
+      audioDuration: Duration(
+        seconds: _random.nextInt(50) + 10,
+      ), // Duração aleatória de 10-60s
     );
     setState(() {
       _messages.add(newAudioMessage);
       // Simular uma resposta automática após um pequeno atraso
       _simulateReply("Recebi seu áudio!");
-
     });
     _scrollToBottom();
   }
@@ -110,7 +127,6 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-
   void _deleteMessage(String messageId) {
     setState(() {
       _messages.removeWhere((msg) => msg.id == messageId);
@@ -120,7 +136,8 @@ class _ChatPageState extends State<ChatPage> {
   void _togglePlayAudio(String messageId) {
     setState(() {
       final messageIndex = _messages.indexWhere((msg) => msg.id == messageId);
-      if (messageIndex != -1 && _messages[messageIndex].type == MessageType.audio) {
+      if (messageIndex != -1 &&
+          _messages[messageIndex].type == MessageType.audio) {
         // Simular parar outros áudios se algum estiver tocando
         for (var msg in _messages) {
           if (msg.id != messageId && msg.isPlaying) {
@@ -154,33 +171,39 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chat Simulado'),
-      ),
-      body: SafeArea(child: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(8.0),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return _buildMessageItem(message);
-              },
+      appBar: AppBar(title: const Text('Chat Simulado')),
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(8.0),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  return _buildMessageItem(message);
+                },
+              ),
             ),
-          ),
-          _buildMessageInputArea(),
-        ],
-      )),
+            _buildMessageInputArea(),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildMessageItem(Message message) {
     final isSender = message.isSender;
-    final messageAlignment = isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final bubbleColor = isSender ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.secondaryContainer;
-    final textColor = isSender ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSecondaryContainer;
+    final messageAlignment = isSender
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
+    final bubbleColor = isSender
+        ? Theme.of(context).colorScheme.primaryContainer
+        : Theme.of(context).colorScheme.secondaryContainer;
+    final textColor = isSender
+        ? Theme.of(context).colorScheme.onPrimaryContainer
+        : Theme.of(context).colorScheme.onSecondaryContainer;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -188,22 +211,34 @@ class _ChatPageState extends State<ChatPage> {
         crossAxisAlignment: messageAlignment,
         children: <Widget>[
           Row(
-            mainAxisAlignment: isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: isSender
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             children: <Widget>[
               // Botão de excluir (sempre à esquerda do balão para o remetente, ou à direita para o destinatário - opcional)
               if (isSender) _buildDeleteButton(message.id),
 
-              Flexible( // Garante que o balão não exceda os limites
+              Flexible(
+                // Garante que o balão não exceda os limites
                 child: Container(
-                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75), // Limita a largura do balão
-                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.75,
+                  ), // Limita a largura do balão
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14.0,
+                    vertical: 10.0,
+                  ),
                   decoration: BoxDecoration(
                     color: bubbleColor,
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16.0),
                       topRight: const Radius.circular(16.0),
-                      bottomLeft: isSender ? const Radius.circular(16.0) : const Radius.circular(0.0),
-                      bottomRight: isSender ? const Radius.circular(0.0) : const Radius.circular(16.0),
+                      bottomLeft: isSender
+                          ? const Radius.circular(16.0)
+                          : const Radius.circular(0.0),
+                      bottomRight: isSender
+                          ? const Radius.circular(0.0)
+                          : const Radius.circular(16.0),
                     ),
                   ),
                   child: message.type == MessageType.text
@@ -211,7 +246,10 @@ class _ChatPageState extends State<ChatPage> {
                       : _buildAudioMessageContent(message, textColor),
                 ),
               ),
-              if (!isSender) _buildDeleteButton(message.id), // Botão de excluir para mensagens recebidas
+              if (!isSender)
+                _buildDeleteButton(
+                  message.id,
+                ), // Botão de excluir para mensagens recebidas
             ],
           ),
         ],
@@ -229,14 +267,15 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-
   Widget _buildAudioMessageContent(Message message, Color textColor) {
     return Row(
       mainAxisSize: MainAxisSize.min, // Para não ocupar espaço desnecessário
       children: <Widget>[
         IconButton(
           icon: Icon(
-            message.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+            message.isPlaying
+                ? Icons.pause_circle_filled
+                : Icons.play_circle_filled,
             color: textColor,
             size: 30.0,
           ),
@@ -247,36 +286,39 @@ class _ChatPageState extends State<ChatPage> {
         const SizedBox(width: 8.0),
         // Simulação de barra de progresso (visual apenas)
         Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Áudio", // Ou message.text se você quiser exibir o placeholder
-                  style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Áudio", // Ou message.text se você quiser exibir o placeholder
+                style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Container(
+                height: 5.0,
+                width: 100.0, // Largura fixa para a barra de "progresso"
+                decoration: BoxDecoration(
+                  color: textColor.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
-                const SizedBox(height: 2),
-                Container(
-                  height: 5.0,
-                  width: 100.0, // Largura fixa para a barra de "progresso"
-                  decoration: BoxDecoration(
-                    color: textColor.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: message.isPlaying ? Align( // Simula progresso quando tocando
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 50.0, // Metade da barra
-                      decoration: BoxDecoration(
-                        color: textColor,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                  ) : null,
-                ),
-              ],
-            )
+                child: message.isPlaying
+                    ? Align(
+                        // Simula progresso quando tocando
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 50.0, // Metade da barra
+                          decoration: BoxDecoration(
+                            color: textColor,
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+            ],
+          ),
         ),
         const SizedBox(width: 8.0),
         Text(
@@ -319,7 +361,10 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 filled: true,
                 fillColor: Colors.grey[200],
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 10.0,
+                ),
               ),
               onSubmitted: (_) => _sendMessage(),
             ),
