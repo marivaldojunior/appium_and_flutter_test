@@ -111,7 +111,7 @@ class _ListViewPageState extends State<ListViewPage> {
                 Navigator.of(context).pop();
               },
             ),
-            ElevatedButton(
+            TextButton(
               child: const Text('Adicionar'),
               onPressed: () {
                 // Valida o formulário antes de adicionar
@@ -208,7 +208,7 @@ class _ListViewPageState extends State<ListViewPage> {
                 Navigator.of(context).pop();
               },
             ),
-            ElevatedButton(
+            TextButton(
               child: const Text('Salvar'),
               onPressed: () {
                 // Valida o formulário antes de salvar
