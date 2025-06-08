@@ -5,9 +5,15 @@ import 'chat_page.dart';
 import 'forms_page.dart';
 import 'gestos_page.dart';
 import 'listview_page.dart';
+import 'login_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  static const Key logoutButtonKey = ValueKey('home_logout_button');
+  static const Key logoutDialogKey = ValueKey('home_logout_dialog');
+  static const Key logoutDialogCancelButtonKey = ValueKey('home_logout_dialog_cancel_button');
+  static const Key logoutDialogConfirmButtonKey = ValueKey('home_logout_dialog_confirm_button');
 
   Widget _buildGridButton(
     BuildContext context,
@@ -36,11 +42,62 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          key: logoutDialogKey,
+          title: const Text('Confirmar Logout'),
+          content: const Text('Você tem certeza que deseja sair?'),
+          actions: <Widget>[
+            Tooltip(
+              message: 'Cancelar ação de logout',
+              child: TextButton(
+                key: logoutDialogCancelButtonKey,
+                child: const Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+            ),
+            Tooltip(
+              message: 'Confirmar e efetuar logout',
+              child: TextButton(
+                key: logoutDialogConfirmButtonKey,
+                child: const Text('Sair'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (Route<dynamic> route) => false,
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Menu Principal'), centerTitle: true),
+      appBar: AppBar(title: const Text('Menu Principal'), centerTitle: true,actions: <Widget>[
+        Tooltip(
+          message: 'Sair do aplicativo',
+          child: IconButton(
+            key: logoutButtonKey,
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              _showLogoutDialog(context);
+            },
+          ),
+        ),
+      ],),
       body: Padding(
         padding: const EdgeInsets.all(5.0),
         child: GridView.count(
