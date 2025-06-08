@@ -25,6 +25,20 @@ class Message {
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
 
+  // Keys for testing
+  static const Key chatListViewKey = ValueKey('chat_page_list_view');
+  static const Key messageTextFieldKey = ValueKey(
+    'chat_page_message_text_field',
+  );
+  static const Key sendTextButtonKey = ValueKey('chat_page_send_text_button');
+  static const Key sendAudioButtonKey = ValueKey('chat_page_send_audio_button');
+
+  // Prefix for dynamic keys within message items
+  static const String messageItemPrefixKey = 'chat_page_message_item_';
+  static const String messageDeleteButtonSuffixKey = '_delete_button';
+  static const String messagePlayPauseButtonSuffixKey = '_play_pause_button';
+  static const String messageContentSuffixKey = '_content';
+
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
@@ -177,12 +191,17 @@ class _ChatPageState extends State<ChatPage> {
           children: <Widget>[
             Expanded(
               child: ListView.builder(
+                key: ChatPage.chatListViewKey,
                 controller: _scrollController,
                 padding: const EdgeInsets.all(8.0),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
-                  return _buildMessageItem(message);
+                  // Add a key to each message item for easier targeting
+                  return _buildMessageItem(
+                    message,
+                    ValueKey('${ChatPage.messageItemPrefixKey}${message.id}'),
+                  );
                 },
               ),
             ),
@@ -193,7 +212,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Widget _buildMessageItem(Message message) {
+  Widget _buildMessageItem(Message message, Key itemKey) {
     final isSender = message.isSender;
     final messageAlignment = isSender
         ? CrossAxisAlignment.end
@@ -206,6 +225,7 @@ class _ChatPageState extends State<ChatPage> {
         : Theme.of(context).colorScheme.onSecondaryContainer;
 
     return Container(
+      key: itemKey, // Key for the entire message item container
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       child: Column(
         crossAxisAlignment: messageAlignment,
@@ -224,6 +244,9 @@ class _ChatPageState extends State<ChatPage> {
                   constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width * 0.75,
                   ), // Limita a largura do balão
+                  key: ValueKey(
+                    '${ChatPage.messageItemPrefixKey}${message.id}${ChatPage.messageContentSuffixKey}',
+                  ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14.0,
                     vertical: 10.0,
@@ -259,6 +282,9 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildDeleteButton(String messageId) {
     return IconButton(
+      key: ValueKey(
+        '${ChatPage.messageItemPrefixKey}$messageId${ChatPage.messageDeleteButtonSuffixKey}',
+      ),
       icon: Icon(Icons.delete_outline, size: 18.0, color: Colors.grey[600]),
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(),
@@ -272,6 +298,9 @@ class _ChatPageState extends State<ChatPage> {
       mainAxisSize: MainAxisSize.min, // Para não ocupar espaço desnecessário
       children: <Widget>[
         IconButton(
+          key: ValueKey(
+            '${ChatPage.messageItemPrefixKey}${message.id}${ChatPage.messagePlayPauseButtonSuffixKey}',
+          ),
           icon: Icon(
             message.isPlaying
                 ? Icons.pause_circle_filled
@@ -352,6 +381,7 @@ class _ChatPageState extends State<ChatPage> {
         children: <Widget>[
           Expanded(
             child: TextField(
+              key: ChatPage.messageTextFieldKey,
               controller: _textController,
               decoration: InputDecoration(
                 hintText: 'Digite uma mensagem...',
@@ -370,12 +400,14 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           IconButton(
+            key: ChatPage.sendAudioButtonKey,
             icon: const Icon(Icons.mic),
             onPressed: _sendAudioMessage,
             tooltip: "Enviar mensagem de áudio",
           ),
           IconButton(
             icon: const Icon(Icons.send),
+            key: ChatPage.sendTextButtonKey,
             onPressed: _sendMessage,
             tooltip: "Enviar mensagem de texto",
           ),

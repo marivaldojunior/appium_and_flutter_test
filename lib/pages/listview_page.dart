@@ -6,6 +6,39 @@ import '../model/list_item_data.dart'; // Para gerar IDs aleatórios
 class ListViewPage extends StatefulWidget {
   const ListViewPage({super.key});
 
+  // Keys for testing
+  static const Key addFloatingActionButtonKey = ValueKey('listview_add_fab');
+  static const Key emptyListTextKey = ValueKey('listview_empty_text');
+  static const Key listViewKey = ValueKey('listview_list');
+
+  // Keys for Add/Edit Dialog
+  static const Key addItemDialogKey = ValueKey('listview_add_item_dialog');
+  static const Key editItemDialogKey = ValueKey('listview_edit_item_dialog');
+  static const Key dialogTitleFieldKey = ValueKey(
+    'listview_dialog_title_field',
+  );
+  static const Key dialogDescriptionFieldKey = ValueKey(
+    'listview_dialog_description_field',
+  );
+  static const Key dialogCancelButtonKey = ValueKey(
+    'listview_dialog_cancel_button',
+  );
+  static const Key dialogAddButtonKey = ValueKey('listview_dialog_add_button');
+  static const Key dialogSaveButtonKey = ValueKey(
+    'listview_dialog_save_button',
+  );
+
+  // Keys for Delete Confirmation Dialog
+  static const Key deleteConfirmDialogKey = ValueKey(
+    'listview_delete_confirm_dialog',
+  );
+  static const Key deleteConfirmCancelButtonKey = ValueKey(
+    'listview_delete_confirm_cancel_button',
+  );
+  static const Key deleteConfirmDeleteButtonKey = ValueKey(
+    'listview_delete_confirm_delete_button',
+  );
+
   @override
   State<ListViewPage> createState() => _ListViewPageState();
 }
@@ -61,6 +94,7 @@ class _ListViewPageState extends State<ListViewPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          key: ListViewPage.addItemDialogKey,
           title: const Text('Adicionar Novo Item'),
           content: SingleChildScrollView(
             child: Form(
@@ -70,6 +104,7 @@ class _ListViewPageState extends State<ListViewPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   TextFormField(
+                    key: ListViewPage.dialogTitleFieldKey,
                     // Usa TextFormField para validação
                     controller: titleController,
                     decoration: const InputDecoration(
@@ -86,6 +121,7 @@ class _ListViewPageState extends State<ListViewPage> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
+                    key: ListViewPage.dialogDescriptionFieldKey,
                     // Usa TextFormField para validação
                     controller: descriptionController,
                     decoration: const InputDecoration(
@@ -106,12 +142,14 @@ class _ListViewPageState extends State<ListViewPage> {
           ),
           actions: <Widget>[
             TextButton(
+              key: ListViewPage.dialogCancelButtonKey,
               child: const Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
+              key: ListViewPage.dialogAddButtonKey,
               child: const Text('Adicionar'),
               onPressed: () {
                 // Valida o formulário antes de adicionar
@@ -164,6 +202,7 @@ class _ListViewPageState extends State<ListViewPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          key: ListViewPage.editItemDialogKey,
           title: const Text('Editar Item'),
           content: SingleChildScrollView(
             child: Form(
@@ -173,6 +212,7 @@ class _ListViewPageState extends State<ListViewPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   TextFormField(
+                    key: ListViewPage.dialogTitleFieldKey,
                     // Usa TextFormField para validação
                     controller: titleController,
                     decoration: const InputDecoration(labelText: 'Título'),
@@ -186,6 +226,7 @@ class _ListViewPageState extends State<ListViewPage> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
+                    key: ListViewPage.dialogDescriptionFieldKey,
                     // Usa TextFormField para validação
                     controller: descriptionController,
                     decoration: const InputDecoration(labelText: 'Descrição'),
@@ -203,12 +244,14 @@ class _ListViewPageState extends State<ListViewPage> {
           ),
           actions: <Widget>[
             TextButton(
+              key: ListViewPage.dialogCancelButtonKey,
               child: const Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
+              key: ListViewPage.dialogSaveButtonKey,
               child: const Text('Salvar'),
               onPressed: () {
                 // Valida o formulário antes de salvar
@@ -246,6 +289,7 @@ class _ListViewPageState extends State<ListViewPage> {
       appBar: AppBar(title: const Text('Lista com Swipe')),
       body: _items.isEmpty
           ? const Center(
+              key: ListViewPage.emptyListTextKey,
               child: Text(
                 'Nenhum item na lista.\nAdicione alguns itens usando o botão "+".',
                 textAlign: TextAlign.center,
@@ -253,10 +297,13 @@ class _ListViewPageState extends State<ListViewPage> {
               ),
             )
           : ListView.builder(
+              key: ListViewPage.listViewKey,
               itemCount: _items.length,
               itemBuilder: (context, index) {
                 final item = _items[index];
                 return Dismissible(
+                  // A chave do Dismissible já é única por item, o que é bom.
+                  // Para interagir com o conteúdo do item (ListTile), podemos adicionar uma chave a ele.
                   key: Key(item.id), // Chave única para cada item Dismissible
                   // --- Swipe para Direita (Excluir) ---
                   background: Container(
@@ -306,6 +353,7 @@ class _ListViewPageState extends State<ListViewPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
+                            key: ListViewPage.deleteConfirmDialogKey,
                             title: const Text("Confirmar Exclusão"),
                             content: Text(
                               "Você tem certeza que deseja excluir '${item.title}'?",
@@ -315,6 +363,7 @@ class _ListViewPageState extends State<ListViewPage> {
                                 onPressed: () => Navigator.of(
                                   context,
                                 ).pop(false), // Não exclui
+                                key: ListViewPage.deleteConfirmCancelButtonKey,
                                 child: const Text("Cancelar"),
                               ),
                               TextButton(
@@ -323,6 +372,7 @@ class _ListViewPageState extends State<ListViewPage> {
                                 ),
                                 onPressed: () =>
                                     Navigator.of(context).pop(true), // Exclui
+                                key: ListViewPage.deleteConfirmDeleteButtonKey,
                                 child: const Text("Excluir"),
                               ),
                             ],
@@ -349,6 +399,8 @@ class _ListViewPageState extends State<ListViewPage> {
                       vertical: 4.0,
                     ),
                     child: ListTile(
+                      // Adicionar uma chave ao ListTile se precisar interagir diretamente com ele (além do swipe)
+                      key: ValueKey('list_item_${item.id}'),
                       title: Text(
                         item.title,
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -373,6 +425,7 @@ class _ListViewPageState extends State<ListViewPage> {
               },
             ),
       floatingActionButton: FloatingActionButton(
+        key: ListViewPage.addFloatingActionButtonKey,
         onPressed: _addItem,
         tooltip: 'Adicionar Item',
         child: const Icon(Icons.add),

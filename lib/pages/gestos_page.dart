@@ -53,6 +53,13 @@ class SignaturePainter extends CustomPainter {
 
 class GestosPage extends StatefulWidget {
   const GestosPage({super.key});
+  // Keys for testing
+  static const Key clearAllButtonKey = ValueKey('gestos_clear_all_button');
+  static const Key drawingAreaKey = ValueKey('gestos_drawing_area');
+  static const Key colorDropdownKey = ValueKey('gestos_color_dropdown');
+  static const Key strokeWidthSliderKey = ValueKey(
+    'gestos_stroke_width_slider',
+  );
 
   @override
   State<GestosPage> createState() => _GestosPageState();
@@ -71,6 +78,7 @@ class _GestosPageState extends State<GestosPage> {
         title: const Text('Desenho / Assinatura'),
         actions: [
           IconButton(
+            key: GestosPage.clearAllButtonKey,
             icon: const Icon(Icons.clear_all),
             tooltip: 'Limpar Tudo',
             onPressed: () {
@@ -89,6 +97,7 @@ class _GestosPageState extends State<GestosPage> {
             // Área de Desenho Refatorada
             Expanded(
               child: GestureDetector(
+                key: GestosPage.drawingAreaKey,
                 behavior: HitTestBehavior.opaque, // Mantém, é importante
                 onPanStart: (details) {
                   setState(() {
@@ -153,6 +162,7 @@ class _GestosPageState extends State<GestosPage> {
         children: <Widget>[
           DropdownButtonHideUnderline(
             child: DropdownButton<Color>(
+              key: GestosPage.colorDropdownKey,
               value: _selectedColor,
               items: [
                 DropdownMenuItem(
@@ -192,6 +202,7 @@ class _GestosPageState extends State<GestosPage> {
                 const Text('Espessura:'),
                 Expanded(
                   child: Slider(
+                    key: GestosPage.strokeWidthSliderKey,
                     value: _strokeWidth,
                     min: 1.0, // Mínimo de 1.0 para garantir visibilidade
                     max: 20.0,

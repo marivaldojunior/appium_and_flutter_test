@@ -12,17 +12,33 @@ class HomePage extends StatelessWidget {
 
   static const Key logoutButtonKey = ValueKey('home_logout_button');
   static const Key logoutDialogKey = ValueKey('home_logout_dialog');
-  static const Key logoutDialogCancelButtonKey = ValueKey('home_logout_dialog_cancel_button');
-  static const Key logoutDialogConfirmButtonKey = ValueKey('home_logout_dialog_confirm_button');
+  static const Key logoutDialogCancelButtonKey = ValueKey(
+    'home_logout_dialog_cancel_button',
+  );
+  static const Key logoutDialogConfirmButtonKey = ValueKey(
+    'home_logout_dialog_confirm_button',
+  );
+  static const Key formsButtonKey = ValueKey('home_forms_button');
+  static const Key listViewButtonKey = ValueKey('home_listview_button');
+  static const Key nativeResourcesButtonKey = ValueKey(
+    'home_native_resources_button',
+  );
+  static const Key gesturesButtonKey = ValueKey('home_gestures_button');
+  static const Key clickAndHoldButtonKey = ValueKey(
+    'home_click_and_hold_button',
+  );
+  static const Key chatButtonKey = ValueKey('home_chat_button');
 
   Widget _buildGridButton(
     BuildContext context,
     String title,
     IconData icon,
     VoidCallback onPressed,
+    Key? key,
   ) {
     return Card(
       margin: const EdgeInsets.all(8.0),
+      key: key,
       child: InkWell(
         onTap: onPressed,
         splashColor: Theme.of(context).primaryColorLight,
@@ -42,6 +58,7 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -72,7 +89,7 @@ class HomePage extends StatelessWidget {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => const LoginPage()),
-                        (Route<dynamic> route) => false,
+                    (Route<dynamic> route) => false,
                   );
                 },
               ),
@@ -86,18 +103,22 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Menu Principal'), centerTitle: true,actions: <Widget>[
-        Tooltip(
-          message: 'Sair do aplicativo',
-          child: IconButton(
-            key: logoutButtonKey,
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              _showLogoutDialog(context);
-            },
+      appBar: AppBar(
+        title: const Text('Menu Principal'),
+        centerTitle: true,
+        actions: <Widget>[
+          Tooltip(
+            message: 'Sair do aplicativo',
+            child: IconButton(
+              key: logoutButtonKey,
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                _showLogoutDialog(context);
+              },
+            ),
           ),
-        ),
-      ],),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(5.0),
         child: GridView.count(
@@ -113,7 +134,7 @@ class HomePage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Navegar para Formulários')),
               );
-            }),
+            }, formsButtonKey),
             _buildGridButton(context, 'ListView', Icons.list_alt, () {
               Navigator.push(
                 context,
@@ -122,7 +143,7 @@ class HomePage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Navegar para ListView')),
               );
-            }),
+            }, listViewButtonKey),
             _buildGridButton(context, 'Recursos Nativos', Icons.smartphone, () {
               Navigator.push(
                 context,
@@ -131,19 +152,19 @@ class HomePage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Navegar para Recursos Nativos')),
               );
-            }),
+            }, nativeResourcesButtonKey),
             _buildGridButton(context, 'Gestos na Tela', Icons.gesture, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const GestosPage()),
               );
-            }),
+            }, gesturesButtonKey),
             _buildGridButton(context, 'Clicar e Segurar', Icons.touch_app, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ClickPage()),
               );
-            }),
+            }, clickAndHoldButtonKey),
             _buildGridButton(
               // ou qualquer outro botão/trigger
               context,
@@ -155,6 +176,7 @@ class HomePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const ChatPage()),
                 );
               },
+              chatButtonKey,
             ),
             // Você pode adicionar mais botões aqui, se necessário
             // Se o número de botões for ímpar e você quiser manter o layout,

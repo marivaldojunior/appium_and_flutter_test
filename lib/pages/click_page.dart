@@ -3,15 +3,25 @@ import 'package:flutter/material.dart';
 class ClickPage extends StatelessWidget {
   const ClickPage({super.key});
 
+  // Keys for testing
+  static const Key doubleTapCardKey = ValueKey('click_page_double_tap_card');
+  static const Key longPressCardKey = ValueKey('click_page_long_press_card');
+  static const Key alertDialogKey = ValueKey('click_page_alert_dialog');
+  static const Key alertDialogOkButtonKey = ValueKey(
+    'click_page_alert_dialog_ok_button',
+  );
+
   void _showAlertDialog(BuildContext context, String title, String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          key: alertDialogKey,
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
             TextButton(
+              key: alertDialogOkButtonKey,
               child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -35,6 +45,7 @@ class ClickPage extends StatelessWidget {
           children: <Widget>[
             // Card para Duplo Clique
             GestureDetector(
+              key: doubleTapCardKey,
               onDoubleTap: () {
                 print('Duplo clique detectado!');
                 _showAlertDialog(
@@ -78,6 +89,7 @@ class ClickPage extends StatelessWidget {
             const SizedBox(height: 32.0), // Espaçamento entre os cards
             // Card para Clique Longo
             GestureDetector(
+              key: longPressCardKey,
               onLongPress: () {
                 print('Clique longo detectado!');
                 _showAlertDialog(

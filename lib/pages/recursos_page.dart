@@ -5,6 +5,34 @@ import 'package:image_picker/image_picker.dart';
 class RecursosPage extends StatefulWidget {
   const RecursosPage({super.key});
 
+  // Keys for testing
+  static const Key imageDisplayAreaKey = ValueKey(
+    'recursos_image_display_area',
+  );
+  static const Key openCameraButtonKey = ValueKey(
+    'recursos_open_camera_button',
+  );
+  static const Key openGalleryButtonKey = ValueKey(
+    'recursos_open_gallery_button',
+  );
+  static const Key removeImageButtonKey = ValueKey(
+    'recursos_remove_image_button',
+  );
+  static const Key selectImageButtonKey = ValueKey(
+    'recursos_select_image_button',
+  ); // For the alternative button
+
+  // Keys for ModalBottomSheet options
+  static const Key imageSourceSheetKey = ValueKey(
+    'recursos_image_source_sheet',
+  );
+  static const Key imageSourceSheetGalleryOptionKey = ValueKey(
+    'recursos_image_source_sheet_gallery_option',
+  );
+  static const Key imageSourceSheetCameraOptionKey = ValueKey(
+    'recursos_image_source_sheet_camera_option',
+  );
+
   @override
   State<RecursosPage> createState() => _RecursosPageState();
 }
@@ -60,26 +88,32 @@ class _RecursosPageState extends State<RecursosPage> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Abrir Galeria'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Abrir Câmera'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-            ],
+        return Container(
+          // Wrap with a container to assign a key to the sheet itself
+          key: RecursosPage.imageSourceSheetKey,
+          child: SafeArea(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                  key: RecursosPage.imageSourceSheetGalleryOptionKey,
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Abrir Galeria'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _pickImage(ImageSource.gallery);
+                  },
+                ),
+                ListTile(
+                  key: RecursosPage.imageSourceSheetCameraOptionKey,
+                  leading: const Icon(Icons.photo_camera),
+                  title: const Text('Abrir Câmera'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _pickImage(ImageSource.camera);
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -100,6 +134,7 @@ class _RecursosPageState extends State<RecursosPage> {
             children: <Widget>[
               // Área para exibir a imagem
               Container(
+                key: RecursosPage.imageDisplayAreaKey,
                 height: 300, // Altura fixa para o container da imagem
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade400, width: 1),
@@ -143,6 +178,7 @@ class _RecursosPageState extends State<RecursosPage> {
 
               // Botão para abrir a câmera
               ElevatedButton.icon(
+                key: RecursosPage.openCameraButtonKey,
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Abrir Câmera'),
                 onPressed: () => _pickImage(ImageSource.camera),
@@ -155,6 +191,7 @@ class _RecursosPageState extends State<RecursosPage> {
 
               // Botão para abrir a galeria
               ElevatedButton.icon(
+                key: RecursosPage.openGalleryButtonKey,
                 icon: const Icon(Icons.photo_library),
                 label: const Text('Abrir Galeria'),
                 onPressed: () => _pickImage(ImageSource.gallery),
@@ -168,6 +205,7 @@ class _RecursosPageState extends State<RecursosPage> {
               // Opcional: Um botão para limpar a imagem selecionada
               if (_imageFile != null)
                 TextButton.icon(
+                  key: RecursosPage.removeImageButtonKey,
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
                   label: const Text(
                     'Remover Imagem',
@@ -184,6 +222,7 @@ class _RecursosPageState extends State<RecursosPage> {
               // const SizedBox(height: 30),
               // const Text("Alternativa:", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
               // ElevatedButton.icon(
+              //   key: RecursosPage.selectImageButtonKey,
               //   icon: const Icon(Icons.add_a_photo),
               //   label: const Text('Selecionar Imagem'),
               //   onPressed: () => _showImageSourceActionSheet(context),

@@ -1,8 +1,26 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Para formatação de data
 
 class FormsPage extends StatefulWidget {
   const FormsPage({super.key});
+
+  // Keys for testing
+  static const Key nameFieldKey = ValueKey('forms_name_field');
+  static const Key emailFieldKey = ValueKey('forms_email_field');
+  static const Key ageFieldKey = ValueKey('forms_age_field');
+  static const Key datePickerFieldKey = ValueKey('forms_date_picker_field');
+  static const Key subscribeSwitchKey = ValueKey('forms_subscribe_switch');
+  static const String skillCheckboxPrefixKey =
+      'forms_skill_checkbox_'; // Prefix for dynamic keys
+  static const String genderRadioPrefixKey =
+      'forms_gender_radio_'; // Prefix for dynamic keys
+  static const Key countryDropdownKey = ValueKey('forms_country_dropdown');
+  static const Key descriptionFieldKey = ValueKey('forms_description_field');
+  static const Key submitButtonKey = ValueKey('forms_submit_button');
+  // Keys for validation messages if needed, e.g.:
+  // static const Key dateValidationErrorKey = ValueKey('forms_date_validation_error');
 
   @override
   State<FormsPage> createState() => _FormsPageState();
@@ -78,18 +96,18 @@ class _FormsPageState extends State<FormsPage> {
       );
 
       // Opcional: Limpar o formulário após o envio
-      // _formKey.currentState!.reset();
-      // _nameController.clear();
-      // _emailController.clear();
-      // _ageController.clear();
-      // _descriptionController.clear();
-      // setState(() {
-      //   _selectedDate = null;
-      //   _isSubscribed = false;
-      //   _selectedSkills.clear();
-      //   _selectedGender = null;
-      //   _selectedCountry = null;
-      // });
+      _formKey.currentState!.reset();
+      _nameController.clear();
+      _emailController.clear();
+      _ageController.clear();
+      _descriptionController.clear();
+      setState(() {
+        _selectedDate = null;
+        _isSubscribed = false;
+        _selectedSkills.clear();
+        _selectedGender = null;
+        _selectedCountry = null;
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -123,6 +141,7 @@ class _FormsPageState extends State<FormsPage> {
                 // Campo de Texto Simples (Nome)
                 const SizedBox(height: 10.0),
                 TextFormField(
+                  key: FormsPage.nameFieldKey,
                   controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: 'Nome Completo',
@@ -141,6 +160,7 @@ class _FormsPageState extends State<FormsPage> {
 
                 // Campo de Email
                 TextFormField(
+                  key: FormsPage.emailFieldKey,
                   controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: 'Email',
@@ -165,6 +185,7 @@ class _FormsPageState extends State<FormsPage> {
 
                 // Campo Numérico (Idade)
                 TextFormField(
+                  key: FormsPage.ageFieldKey,
                   controller: _ageController,
                   decoration: const InputDecoration(
                     labelText: 'Idade',
@@ -191,6 +212,7 @@ class _FormsPageState extends State<FormsPage> {
 
                 // Seletor de Data
                 ListTile(
+                  key: FormsPage.datePickerFieldKey,
                   leading: const Icon(Icons.calendar_today, color: Colors.grey),
                   title: Text(
                     _selectedDate == null
@@ -210,6 +232,7 @@ class _FormsPageState extends State<FormsPage> {
                 ),
                 // Adicionando um validador "manual" para o seletor de data
                 FormField<DateTime>(
+                  // key: FormsPage.dateValidationErrorKey, // If you want to target the error message directly
                   builder: (FormFieldState<DateTime> state) {
                     return state.hasError
                         ? Padding(
@@ -239,6 +262,7 @@ class _FormsPageState extends State<FormsPage> {
 
                 // Switch (Inscrição)
                 SwitchListTile(
+                  key: FormsPage.subscribeSwitchKey,
                   title: const Text('Receber notificações?'),
                   secondary: Icon(
                     _isSubscribed
@@ -262,6 +286,9 @@ class _FormsPageState extends State<FormsPage> {
                 Column(
                   children: _availableSkills.map((skill) {
                     return CheckboxListTile(
+                      key: ValueKey(
+                        '${FormsPage.skillCheckboxPrefixKey}$skill',
+                      ),
                       title: Text(skill),
                       value: _selectedSkills.contains(skill),
                       onChanged: (bool? selected) {
@@ -312,6 +339,7 @@ class _FormsPageState extends State<FormsPage> {
                 Column(
                   children: _availableGenders.map((gender) {
                     return RadioListTile<String>(
+                      key: ValueKey('${FormsPage.genderRadioPrefixKey}$gender'),
                       title: Text(gender),
                       value: gender,
                       groupValue: _selectedGender,
@@ -352,6 +380,7 @@ class _FormsPageState extends State<FormsPage> {
                 const SizedBox(height: 16.0),
                 // DropdownButton (País)
                 DropdownButtonFormField<String>(
+                  key: FormsPage.countryDropdownKey,
                   decoration: const InputDecoration(
                     labelText: 'País de Origem',
                     icon: Icon(Icons.flag),
@@ -378,6 +407,7 @@ class _FormsPageState extends State<FormsPage> {
 
                 // Campo de Texto Multilinha (Descrição)
                 TextFormField(
+                  key: FormsPage.descriptionFieldKey,
                   controller: _descriptionController,
                   decoration: const InputDecoration(
                     labelText: 'Sobre você (opcional)',
@@ -392,6 +422,7 @@ class _FormsPageState extends State<FormsPage> {
 
                 // Botão de Envio
                 ElevatedButton(
+                  key: FormsPage.submitButtonKey,
                   onPressed: _submitForm,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
