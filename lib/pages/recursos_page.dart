@@ -219,19 +219,22 @@ class _RecursosPageState extends State<RecursosPage> {
                 ),
 
               // Alternativa: Um botão único que abre um menu de opções (câmera ou galeria)
-              // const SizedBox(height: 30),
-              // const Text("Alternativa:", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
-              // ElevatedButton.icon(
-              //   key: RecursosPage.selectImageButtonKey,
-              //   icon: const Icon(Icons.add_a_photo),
-              //   label: const Text('Selecionar Imagem'),
-              //   onPressed: () => _showImageSourceActionSheet(context),
-              //   style: ElevatedButton.styleFrom(
-              //     padding: const EdgeInsets.symmetric(vertical: 12.0),
-              //     textStyle: const TextStyle(fontSize: 16),
-              //     backgroundColor: Colors.teal
-              //   ),
-              // ),
+              const SizedBox(height: 30),
+              const Text(
+                "Alternativa:",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              ElevatedButton.icon(
+                key: RecursosPage.selectImageButtonKey,
+                icon: const Icon(Icons.add_a_photo),
+                label: const Text('Selecionar Imagem'),
+                onPressed: () => _showImageSourceActionSheet(context),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+              ),
             ],
           ),
         ),
