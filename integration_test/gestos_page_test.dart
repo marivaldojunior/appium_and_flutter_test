@@ -1,3 +1,5 @@
+import 'package:appium_and_flutter_test/pages/home_page.dart';
+import 'package:appium_and_flutter_test/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -8,12 +10,35 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Testes de Integração da GestosPage', () {
-    Future<void> _ensurePageLoaded(WidgetTester tester) async {
-      app.main(); // Ou navegue para a GestosPage se não for a inicial
-      await tester.pumpAndSettle();
-      // Se GestosPage não for a página inicial, adicione a navegação aqui.
-      // Ex: await tester.tap(find.byTooltip('Gestos')); ou similar
-      // await tester.pumpAndSettle();
+    Future<void> _navigateToGestosPage(WidgetTester tester) async {
+      app.main(); // Inicia o app
+      // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Se estiver na LoginPage, realiza o login
+      if (tester.any(find.byType(LoginPage))) {
+        await tester.enterText(
+          find.byKey(LoginPage.usernameFieldKey),
+          'admin', // Use um usuário válido, ex: 'admin' ou 'flutter'
+        );
+        await tester.enterText(
+          find.byKey(LoginPage.passwordFieldKey),
+          '1234', // Use uma senha válida, ex: '1234' ou '123456'
+        );
+        await tester.tap(find.byKey(LoginPage.loginButtonKey));
+        // Aguarda o login, navegação para HomePage e desaparecimento do SnackBar
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+      }
+
+      // Garante que está na HomePage
+      expect(
+        find.byType(HomePage),
+        findsOneWidget,
+        reason: "Não foi possível alcançar a HomePage.",
+      );
+      // Navega para GestosPage
+      await tester.tap(find.byKey(HomePage.gesturesButtonKey));
+      await tester.pumpAndSettle(); // Aguarda a navegação
       expect(
         find.byType(GestosPage),
         findsOneWidget,
@@ -61,7 +86,7 @@ void main() {
     testWidgets('Desenha, muda cor, muda espessura e limpa a área de desenho', (
       WidgetTester tester,
     ) async {
-      await _ensurePageLoaded(tester);
+      await _navigateToGestosPage(tester);
 
       // 1. Estado Inicial
       SignaturePainter painter = getSignaturePainter(tester);
@@ -137,9 +162,15 @@ void main() {
       final double relativeTapX =
           (targetStrokeWidth - sliderWidget.min) /
           (sliderWidget.max - sliderWidget.min);
+      // Garante que relativeTapX esteja dentro do intervalo [0.0, 1.0].
+      // Isso é uma proteção caso targetStrokeWidth esteja fora do intervalo min/max do slider.
+      final double clampedRelativeTapX = relativeTapX.clamp(0.0, 1.0);
 
       // Toca no slider na posição relativa calculada
-      await tester.tap(sliderFinder, relative: Offset(relativeTapX, 0.5));
+      await tester.tap(
+        sliderFinder,
+        relative: Offset(clampedRelativeTapX, 0.5),
+      );
       await tester.pumpAndSettle();
 
       // Verifica se o valor do slider foi atualizado

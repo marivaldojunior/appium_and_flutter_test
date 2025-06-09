@@ -23,43 +23,41 @@ void main() {
     }
   }
 
-  group('Testes de Integração da HomePage', () {
-    setUpAll(() async {
-      // Simula um login bem-sucedido para chegar à HomePage,
-      // ou ajusta para iniciar diretamente na HomePage se for o caso.
-      // Se o app já inicia na HomePage (ou se o login não é estritamente necessário
-      // para *testar* a HomePage isoladamente), esta parte pode ser simplificada.
-      app.main(); // Inicia o app
-      await Future.delayed(
-        const Duration(seconds: 1),
-      ); // Pequena espera inicial
+  Future<void> _ensureLoggedInAndOnHomePage(WidgetTester tester) async {
+    app.main(); // Inicia o app
+    await tester.pumpAndSettle(
+      const Duration(seconds: 1),
+    ); // Pequena espera inicial
 
-      // Se o app inicia na LoginPage, faz o login
-      if (find.byType(LoginPage).evaluate().isNotEmpty) {
-        await tester.enterText(
-          find.byKey(LoginPage.usernameFieldKey),
-          'flutter',
-        );
-        await tester.enterText(
-          find.byKey(LoginPage.passwordFieldKey),
-          '123456',
-        );
-        await tester.tap(find.byKey(LoginPage.loginButtonKey));
-        await tester.pumpAndSettle(
-          const Duration(seconds: 2),
-        ); // Aguarda navegação e SnackBar
-      }
-      // Garante que a HomePage está carregada
-      expect(
-        find.byType(HomePage),
-        findsOneWidget,
-        reason: "HomePage não foi carregada após o setup.",
+    // Se o app inicia na LoginPage, faz o login
+    if (tester.any(find.byType(LoginPage))) {
+      await tester.enterText(
+        find.byKey(LoginPage.usernameFieldKey),
+        'flutter', // Usando as credenciais do setUpAll original
       );
-    });
+      await tester.enterText(
+        find.byKey(LoginPage.passwordFieldKey),
+        '123456', // Usando as credenciais do setUpAll original
+      );
+      await tester.tap(find.byKey(LoginPage.loginButtonKey));
+      await tester.pumpAndSettle(
+        const Duration(seconds: 3), // Aguarda navegação e SnackBar
+      );
+    }
+    // Garante que a HomePage está carregada
+    expect(
+      find.byType(HomePage),
+      findsOneWidget,
+      reason: "HomePage não foi carregada após o login.",
+    );
+  }
 
+  group('Testes de Integração da HomePage', () {
     testWidgets('Verifica elementos da UI e navegação para todas as seções', (
       WidgetTester tester,
     ) async {
+      await _ensureLoggedInAndOnHomePage(tester);
+
       // Garante que estamos na HomePage (caso algum teste anterior tenha navegado)
       // Se o setUpAll já garante isso, esta verificação pode ser redundante,
       // mas é bom para testes individuais.
@@ -124,6 +122,8 @@ void main() {
     testWidgets('Testa funcionalidade de Logout (Cancelar e Confirmar)', (
       WidgetTester tester,
     ) async {
+      await _ensureLoggedInAndOnHomePage(tester);
+
       // Garante que estamos na HomePage
       if (find.byType(HomePage).evaluate().isEmpty) {
         final NavigatorState navigator = tester.state(find.byType(Navigator));

@@ -9,15 +9,12 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Testes de Integração da LoginPage', () {
-    setUp(() async {
-      // Garante que o app seja reiniciado para cada teste, começando na LoginPage
-      app.main();
-      await tester.pumpAndSettle();
-    });
-
     testWidgets('Verifica UI inicial e validações de campos vazios', (
       WidgetTester tester,
     ) async {
+      // Garante que o app seja reiniciado para cada teste, começando na LoginPage
+      app.main();
+      await tester.pumpAndSettle();
       // Verifica se a LoginPage está sendo exibida
       expect(find.byType(LoginPage), findsOneWidget);
 
@@ -41,6 +38,9 @@ void main() {
     testWidgets('Login com credenciais incorretas exibe diálogo de erro', (
       WidgetTester tester,
     ) async {
+      // Garante que o app seja reiniciado para cada teste, começando na LoginPage
+      app.main();
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(LoginPage.usernameFieldKey),
         'usuarioerrado',
@@ -69,6 +69,9 @@ void main() {
     testWidgets(
       'Login com credenciais corretas navega para HomePage e exibe SnackBar',
       (WidgetTester tester) async {
+        // Garante que o app seja reiniciado para cada teste, começando na LoginPage
+        app.main();
+        await tester.pumpAndSettle();
         // Usa as credenciais padrão definidas na LoginPageState
         // Se forem diferentes, ajuste aqui.
         const String defaultUsername = 'admin';
@@ -104,6 +107,9 @@ void main() {
     testWidgets('Botão "Esqueceu a senha?" exibe SnackBar informativo', (
       WidgetTester tester,
     ) async {
+      // Garante que o app seja reiniciado para cada teste, começando na LoginPage
+      app.main();
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(LoginPage.forgotPasswordButtonKey));
       await tester.pumpAndSettle(); // Aguarda o SnackBar aparecer
 

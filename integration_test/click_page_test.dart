@@ -63,7 +63,8 @@ void main() {
       );
 
       // Realiza o duplo clique
-      await tester.doubleTap(doubleTapCardFinder);
+      await tester.tap(doubleTapCardFinder);
+      await tester.tap(doubleTapCardFinder);
       await tester.pumpAndSettle(); // Aguarda o diálogo aparecer
 
       // Verifica se o AlertDialog de duplo clique apareceu
