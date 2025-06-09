@@ -1,3 +1,5 @@
+import 'package:appium_and_flutter_test/pages/home_page.dart';
+import 'package:appium_and_flutter_test/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -7,15 +9,50 @@ import 'package:appium_and_flutter_test/pages/click_page.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  Future<void> _navigateToClickPage(WidgetTester tester) async {
+    app.main(); // Inicia o app
+    // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    // Se estiver na LoginPage, realiza o login
+    if (tester.any(find.byType(LoginPage))) {
+      await tester.enterText(
+        find.byKey(LoginPage.usernameFieldKey),
+        'admin',
+      ); // Use um usuário válido
+      await tester.enterText(
+        find.byKey(LoginPage.passwordFieldKey),
+        '1234',
+      ); // Use uma senha válida
+      await tester.tap(find.byKey(LoginPage.loginButtonKey));
+      // Aguarda o login, navegação para HomePage e desaparecimento do SnackBar
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    }
+
+    // Garante que está na HomePage
+    expect(
+      find.byType(HomePage),
+      findsOneWidget,
+      reason: "Não foi possível alcançar a HomePage.",
+    );
+
+    // Navega para ClickPage
+    await tester.tap(find.byKey(HomePage.clickAndHoldButtonKey));
+    await tester.pumpAndSettle(); // Aguarda a navegação
+  }
+
   group('Testes de Integração da ClickPage', () {
     testWidgets('Interage com double tap e long press cards exibindo alertas', (
       WidgetTester tester,
     ) async {
-      // Inicia o app.
-      // Certifique-se de que seu app/main.dart esteja configurado para exibir
-      // a ClickPage ou que haja navegação para ela.
-      app.main();
-      await tester.pumpAndSettle();
+      await _navigateToClickPage(tester);
+
+      // Garante que está na ClickPage
+      expect(
+        find.byType(ClickPage),
+        findsOneWidget,
+        reason: "ClickPage não foi carregada.",
+      );
 
       // --- Teste do Card de Duplo Clique ---
       final doubleTapCardFinder = find.byKey(ClickPage.doubleTapCardKey);

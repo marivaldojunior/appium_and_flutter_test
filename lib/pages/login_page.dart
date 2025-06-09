@@ -4,6 +4,21 @@ import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key}); // A key do construtor principal já está aqui.
+  // --- Keys para Testes ---
+  static const Key usernameFieldKey = ValueKey('login_username_field');
+  static const Key passwordFieldKey = ValueKey('login_password_field');
+  static const Key loginButtonKey = ValueKey('login_button');
+  static const Key forgotPasswordButtonKey = ValueKey(
+    'login_forgot_password_button',
+  );
+  static const Key snackbarForgotPasswordButtonKey = ValueKey(
+    'login_snackbar_forgot_password_info',
+  );
+  static const Key alertDialogErrorOkButtonKey = ValueKey(
+    'login_alert_error_ok_button',
+  );
+
+  // --- Fim das Keys para Testes ---
 
   @override
   State<LoginPage> createState() => LoginPageState();
@@ -16,18 +31,6 @@ class LoginPageState extends State<LoginPage> {
 
   final String _defaultUsername = 'admin';
   final String _defaultPassword = '1234';
-
-  // --- Keys para Testes ---
-  static const Key usernameFieldKey = ValueKey('login_username_field');
-  static const Key passwordFieldKey = ValueKey('login_password_field');
-  static const Key loginButtonKey = ValueKey('login_button');
-  static const Key forgotPasswordButtonKey = ValueKey(
-    'login_forgot_password_button',
-  );
-  static const Key alertDialogErrorOkButtonKey = ValueKey(
-    'login_alert_error_ok_button',
-  );
-  // --- Fim das Keys para Testes ---
 
   void _login() {
     if (_formKey.currentState!.validate()) {
@@ -61,8 +64,8 @@ class LoginPageState extends State<LoginPage> {
                 Tooltip(
                   message: 'Confirmar erro de login', // Mensagem do Tooltip
                   child: TextButton(
-                    key:
-                        alertDialogErrorOkButtonKey, // Usar a const definida acima
+                    key: LoginPage
+                        .alertDialogErrorOkButtonKey, // Usar a const definida acima
                     child: const Text('OK'),
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -124,7 +127,7 @@ class LoginPageState extends State<LoginPage> {
 
                 // Campo de Usuário
                 TextFormField(
-                  key: usernameFieldKey, // Key para teste
+                  key: LoginPage.usernameFieldKey, // Key para teste
                   controller: _usernameController,
                   decoration: const InputDecoration(
                     labelText: 'Usuário', // Bom para semântica e Appium
@@ -143,7 +146,7 @@ class LoginPageState extends State<LoginPage> {
 
                 // Campo de Senha
                 TextFormField(
-                  key: passwordFieldKey, // Key para teste
+                  key: LoginPage.passwordFieldKey, // Key para teste
                   controller: _passwordController,
                   decoration: const InputDecoration(
                     labelText: 'Senha', // Bom para semântica e Appium
@@ -163,7 +166,7 @@ class LoginPageState extends State<LoginPage> {
 
                 // Botão de Login
                 ElevatedButton(
-                  key: loginButtonKey, // Key para teste
+                  key: LoginPage.loginButtonKey, // Key para teste
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -185,11 +188,11 @@ class LoginPageState extends State<LoginPage> {
                 Tooltip(
                   message: 'Recuperar senha esquecida', // Mensagem do Tooltip
                   child: TextButton(
-                    key: forgotPasswordButtonKey,
+                    key: LoginPage.forgotPasswordButtonKey,
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          key: ValueKey('login_snackbar_forgot_password_info'),
+                          key: LoginPage.snackbarForgotPasswordButtonKey,
                           content: Text(
                             'Funcionalidade "Esqueceu a senha?" não implementada.',
                           ),

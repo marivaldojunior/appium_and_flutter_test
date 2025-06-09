@@ -15,9 +15,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Encontrar campos e botão pelas keys
-    final usernameField = find.byKey(LoginPageState.usernameFieldKey);
-    final passwordField = find.byKey(LoginPageState.passwordFieldKey);
-    final loginButton = find.byKey(LoginPageState.loginButtonKey);
+    final usernameField = find.byKey(LoginPage.usernameFieldKey);
+    final passwordField = find.byKey(LoginPage.passwordFieldKey);
+    final loginButton = find.byKey(LoginPage.loginButtonKey);
 
     expect(usernameField, findsOneWidget);
     expect(passwordField, findsOneWidget);
@@ -50,12 +50,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: LoginPage()));
     await tester.pumpAndSettle();
 
-    await tester.enterText(
-      find.byKey(LoginPageState.usernameFieldKey),
-      'errado',
-    );
-    await tester.enterText(find.byKey(LoginPageState.passwordFieldKey), '123');
-    await tester.tap(find.byKey(LoginPageState.loginButtonKey));
+    await tester.enterText(find.byKey(LoginPage.usernameFieldKey), 'errado');
+    await tester.enterText(find.byKey(LoginPage.passwordFieldKey), '123');
+    await tester.tap(find.byKey(LoginPage.loginButtonKey));
     await tester.pumpAndSettle(); // Esperar pelo AlertDialog
 
     // Verificar o AlertDialog de erro

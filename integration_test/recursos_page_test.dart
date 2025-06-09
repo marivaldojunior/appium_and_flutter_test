@@ -14,8 +14,8 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     if (tester.any(find.byType(LoginPage))) {
-      await tester.enterText(find.byKey(LoginPage.usernameFieldKey), 'flutter');
-      await tester.enterText(find.byKey(LoginPage.passwordFieldKey), '123456');
+      await tester.enterText(find.byKey(LoginPage.usernameFieldKey), 'admin');
+      await tester.enterText(find.byKey(LoginPage.passwordFieldKey), '1234');
       await tester.tap(find.byKey(LoginPage.loginButtonKey));
       await tester.pumpAndSettle(const Duration(seconds: 3));
     }
