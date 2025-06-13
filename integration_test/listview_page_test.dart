@@ -16,8 +16,8 @@ void main() {
 
     // Se estiver na LoginPage, realiza o login
     if (tester.any(find.byType(LoginPage))) {
-      await tester.enterText(find.byKey(LoginPage.usernameFieldKey), 'flutter');
-      await tester.enterText(find.byKey(LoginPage.passwordFieldKey), '123456');
+      await tester.enterText(find.byKey(LoginPage.usernameFieldKey), 'admin');
+      await tester.enterText(find.byKey(LoginPage.passwordFieldKey), '1234');
       await tester.tap(find.byKey(LoginPage.loginButtonKey));
       // Aguarda o login, navegação para HomePage e desaparecimento do SnackBar
       await tester.pumpAndSettle(const Duration(seconds: 3));
