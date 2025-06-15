@@ -33,11 +33,11 @@ void main() {
     if (tester.any(find.byType(LoginPage))) {
       await tester.enterText(
         find.byKey(LoginPage.usernameFieldKey),
-        'flutter', // Usando as credenciais do setUpAll original
+        'admin', // Padronizando com outros testes
       );
       await tester.enterText(
         find.byKey(LoginPage.passwordFieldKey),
-        '123456', // Usando as credenciais do setUpAll original
+        '1234', // Padronizando com outros testes
       );
       await tester.tap(find.byKey(LoginPage.loginButtonKey));
       await tester.pumpAndSettle(

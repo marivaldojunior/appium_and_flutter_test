@@ -166,22 +166,27 @@ class _GestosPageState extends State<GestosPage> {
               value: _selectedColor,
               items: [
                 DropdownMenuItem(
+                  key: const ValueKey('color_item_black'),
                   value: Colors.black,
                   child: _buildColorSwatch(Colors.black),
                 ),
                 DropdownMenuItem(
+                  key: const ValueKey('color_item_red'),
                   value: Colors.red,
                   child: _buildColorSwatch(Colors.red),
                 ),
                 DropdownMenuItem(
+                  key: const ValueKey('color_item_green'),
                   value: Colors.green,
                   child: _buildColorSwatch(Colors.green),
                 ),
                 DropdownMenuItem(
+                  key: const ValueKey('color_item_blue'),
                   value: Colors.blue,
                   child: _buildColorSwatch(Colors.blue),
                 ),
                 DropdownMenuItem(
+                  key: const ValueKey('color_item_yellow'),
                   value: Colors.yellow,
                   child: _buildColorSwatch(Colors.yellow),
                 ),

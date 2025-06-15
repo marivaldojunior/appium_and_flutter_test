@@ -1,36 +1,36 @@
-# d:\repos\appium_and_flutter_test\integration_test\click_page_test.py
 import unittest
 import time
+import os
 from appium import webdriver
 from appium.options.common import AppiumOptions
 from appium.webdriver.common.appiumby import AppiumBy
 from appium.webdriver.common.touch_action import TouchAction
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoAlertPresentException
+from selenium.common.exceptions import TimeoutException
+from appium_flutter_finder.flutter_finder import FlutterFinder
 
-# --- INÍCIO: PLACEHOLDERS DE LOCALIZADORES ---
-# !!! IMPORTANTE: Substitua estes placeholders pelos localizadores REAIS do seu app Flutter !!!
+# Configurações do Appium e do Aplicativo
+APPIUM_HOST = 'http://127.0.0.1:4723'
+APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # IMPORTANTE: Atualize este caminho
 
-# LoginPage (assumindo IDs de exemplos anteriores)
-LOC_LOGIN_PAGE_INDICATOR = (AppiumBy.ACCESSIBILITY_ID, "usernameField_LoginPage_ACCESSIBILITY_ID")
-LOC_USERNAME_FIELD = (AppiumBy.ACCESSIBILITY_ID, "usernameField")
-LOC_PASSWORD_FIELD = (AppiumBy.ACCESSIBILITY_ID, "passwordField")
-LOC_LOGIN_BUTTON = (AppiumBy.ACCESSIBILITY_ID, "loginButton")
+# Chaves dos elementos Flutter (ajuste conforme seu código Dart)
+# LoginPage (Exemplos - substitua pelas suas chaves reais)
+LOGIN_USERNAME_FIELD_KEY = 'login_username_field' # Ex: ValueKey('login_username_field')
+LOGIN_PASSWORD_FIELD_KEY = 'login_password_field' # Ex: ValueKey('login_password_field')
+LOGIN_BUTTON_KEY = 'login_button'                 # Ex: ValueKey('login_button')
 
-# HomePage (assumindo IDs de exemplos anteriores)
-LOC_HOME_PAGE_INDICATOR = (AppiumBy.ACCESSIBILITY_ID, "homePageElement_HomePage_ACCESSIBILITY_ID")
-LOC_CLICK_AND_HOLD_BUTTON_ON_HOME = (AppiumBy.ACCESSIBILITY_ID, "homePage.clickAndHoldButtonKey_ACCESSIBILITY_ID") # Do home_page_test
+# HomePage (Exemplos - substitua pelas suas chaves reais)
+HOME_PAGE_INDICATOR_KEY = 'home_page_app_bar_title' # Ex: ValueKey('home_page_app_bar_title')
+HOME_CLICK_PAGE_BUTTON_KEY = 'home_page_click_and_hold_button' # Ex: ValueKey('home_page_click_and_hold_button')
 
 # ClickPage
-LOC_CLICK_PAGE_INDICATOR = (AppiumBy.ACCESSIBILITY_ID, "clickPage_UniqueElement_ACCESSIBILITY_ID") # Um elemento único da ClickPage
-LOC_DOUBLE_TAP_CARD = (AppiumBy.ACCESSIBILITY_ID, "clickPage.doubleTapCardKey_ACCESSIBILITY_ID")
-LOC_LONG_PRESS_CARD = (AppiumBy.ACCESSIBILITY_ID, "clickPage.longPressCardKey_ACCESSIBILITY_ID")
+CLICK_PAGE_APPBAR_TITLE_KEY = 'clickPage_appBar_title' # Ex: ValueKey('clickPage_appBar_title')
+CLICK_PAGE_DOUBLE_TAP_CARD_KEY = 'clickPage_double_tap_card'
+CLICK_PAGE_LONG_PRESS_CARD_KEY = 'clickPage_long_press_card'
 
-# AlertDialog (se os Keys forem expostos ou se for um widget customizado)
-# Se for um alerta nativo, a interação é diferente (driver.switch_to.alert)
-LOC_ALERT_DIALOG_GENERIC = (AppiumBy.ACCESSIBILITY_ID, "clickPage.alertDialogKey_ACCESSIBILITY_ID") # Key do AlertDialog
-LOC_ALERT_DIALOG_OK_BUTTON = (AppiumBy.ACCESSIBILITY_ID, "clickPage.alertDialogOkButtonKey_ACCESSIBILITY_ID") # Key do botão OK
+# AlertDialog (Flutter AlertDialog)
+CLICK_PAGE_ALERT_OK_BUTTON_KEY = 'clickPage_alert_dialog_ok_button' # ValueKey para o botão OK do AlertDialog
 
 # Textos dentro do AlertDialog (para verificação)
 TEXT_ALERT_DOUBLE_TAP_TITLE = "Duplo Clique!"
@@ -38,187 +38,164 @@ TEXT_ALERT_DOUBLE_TAP_CONTENT = "Você clicou duas vezes neste card."
 TEXT_ALERT_LONG_PRESS_TITLE = "Clique Longo!"
 TEXT_ALERT_LONG_PRESS_CONTENT = "Você pressionou e segurou este card."
 
-XPATH_TEXT_CONTAINS_TEMPLATE = "//*[contains(@text, \"{text}\") or contains(@content-desc, \"{text}\") or contains(@name, \"{text}\") or contains(@label, \"{text}\")]"
-# --- FIM: PLACEHOLDERS DE LOCALIZADORES ---
-
 class ClickPageTests(unittest.TestCase):
     driver: webdriver.Remote
     wait: WebDriverWait
+    finder: FlutterFinder
 
-    DEFAULT_WAIT_TIMEOUT = 10
-    SHORT_WAIT_TIMEOUT = 3
-    LONG_WAIT_TIMEOUT = 20
+    @classmethod
+    def setUpClass(cls):
+        if APP_PATH == "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI":
+            raise ValueError("Por favor, atualize a variável APP_PATH com o caminho para o seu APK/APP.")
 
-    CAPABILITIES = dict(
-        platformName='Android',
-        deviceName='emulator-5554',
-        appPackage='com.example.appium_and_flutter_test',
-        appActivity='.MainActivity',
-        automationName='UiAutomator2',
-    )
-    APPIUM_SERVER_URL = 'http://localhost:4723'
+        options = AppiumOptions()
+        options.set_capability('platformName', 'Android') # Ou 'iOS'
+        options.set_capability('automationName', 'Flutter') # Essencial para Flutter
+        options.set_capability('deviceName', 'Android Emulator') # Substitua pelo seu dispositivo/emulador
+        options.set_capability('app', APP_PATH)
+        options.set_capability('retryBackoffTime', 500)
+        options.set_capability('maxRetryCount', 3)
+        options.set_capability('newCommandTimeout', 120)
 
-    def setUp(self):
-        options = AppiumOptions().load_capabilities(self.CAPABILITIES)
-        self.driver = webdriver.Remote(self.APPIUM_SERVER_URL, options=options)
-        self.wait = WebDriverWait(self.driver, self.DEFAULT_WAIT_TIMEOUT)
+        cls.driver = webdriver.Remote(command_executor=APPIUM_HOST, options=options)
+        cls.finder = FlutterFinder()
+        cls.wait = WebDriverWait(cls.driver, 30)
 
-    def tearDown(self):
-        if self.driver:
-            self.driver.quit()
+    @classmethod
+    def tearDownClass(cls):
+        if hasattr(cls, 'driver') and cls.driver:
+            cls.driver.quit()
 
     # --- Helper Methods ---
-    def _is_element_present(self, locator, timeout=SHORT_WAIT_TIMEOUT, context=None):
-        source = context or self.driver
+    def _find_element_by_value_key(self, key_string, timeout=20):
+        return self.wait.until(
+            EC.presence_of_element_located((AppiumBy.FLUTTER, self.finder.by_value_key(key_string)))
+        )
+
+    def _find_element_by_text(self, text_string, timeout=10):
+        # Nota: by_text pode ser menos performático. Use com cautela.
+        # É melhor se o texto for único na tela.
+        return self.wait.until(
+            EC.presence_of_element_located((AppiumBy.FLUTTER, self.finder.by_text(text_string)))
+        )
+
+    def _is_element_present_by_value_key(self, key_string, timeout=3):
         try:
-            WebDriverWait(source, timeout).until(EC.presence_of_element_located(locator))
+            self._find_element_by_value_key(key_string, timeout)
             return True
         except TimeoutException:
             return False
 
-    def _find_element_with_wait(self, locator, timeout=DEFAULT_WAIT_TIMEOUT, context=None):
-        source = context or self.driver
-        return WebDriverWait(source, timeout).until(EC.presence_of_element_located(locator))
-
-    def _click_element_with_wait(self, locator, timeout=DEFAULT_WAIT_TIMEOUT, context=None):
-        source = context or self.driver
-        element = WebDriverWait(source, timeout).until(EC.element_to_be_clickable(locator))
-        element.click()
-
-    def _type_text_with_wait(self, locator, text, timeout=DEFAULT_WAIT_TIMEOUT, context=None, clear_first=True):
-        source = context or self.driver
-        element = self._find_element_with_wait(locator, timeout, context=source)
-        if clear_first:
-            element.clear()
-        element.send_keys(text)
-
-    def _wait_for_text_visibility(self, text_content, visible=True, timeout=DEFAULT_WAIT_TIMEOUT, context=None):
-        source = context or self.driver
-        locator = (AppiumBy.XPATH, XPATH_TEXT_CONTAINS_TEMPLATE.format(text=text_content))
+    def _is_text_present(self, text_string, timeout=3):
         try:
-            if visible:
-                WebDriverWait(source, timeout).until(EC.visibility_of_element_located(locator))
-            else:
-                WebDriverWait(source, timeout).until(EC.invisibility_of_element_located(locator))
+            self._find_element_by_text(text_string, timeout)
+            return True
         except TimeoutException:
-            action = "aparecer" if visible else "desaparecer"
-            self.fail(f"Timeout esperando o texto '{text_content}' {action}.")
+            return False
 
-    def _perform_double_tap(self, element):
-        """Realiza um duplo toque em um elemento."""
-        # Opção 1: Usando tap com count (se suportado e funcionar bem com Flutter)
-        # self.driver.execute_script('mobile: doubleClickGesture', {'elementId': element.id}) # Exemplo para iOS com XCUITest
-        # Para Android com UiAutomator2, pode ser mais complexo ou usar TouchAction
+    def _tap_element(self, element):
+        element.click()
+        time.sleep(0.5) # Pausa para UI
 
-        # Opção 2: TouchAction (mais genérico)
+    def _perform_double_tap_on_element(self, element):
         action = TouchAction(self.driver)
-        action.tap(element).wait(100).tap(element).perform() # Toque, pequena espera, toque
+        action.tap(element).wait(ms=100).tap(element).perform()
         time.sleep(0.5) # Pausa para UI reagir
 
-    def _perform_long_press(self, element, duration_ms=1000):
-        """Realiza um clique longo em um elemento."""
+    def _perform_long_press_on_element(self, element, duration_ms=1000):
         action = TouchAction(self.driver)
         action.long_press(element, duration=duration_ms).release().perform()
         time.sleep(0.5) # Pausa para UI reagir
 
-    def _handle_alert_if_present(self, accept=True, expected_title=None, expected_content=None):
-        """Verifica e interage com um alerta nativo, ou um diálogo Flutter com locators."""
-        try:
-            # Tenta primeiro como alerta nativo
-            WebDriverWait(self.driver, self.SHORT_WAIT_TIMEOUT).until(EC.alert_is_present())
-            alert = self.driver.switch_to.alert
-            print(f"Alerta nativo encontrado: {alert.text}")
-            if expected_title:
-                self.assertIn(expected_title, alert.text, "Título do alerta nativo não corresponde.")
-            if expected_content: # Conteúdo pode ser parte do texto principal do alerta nativo
-                self.assertIn(expected_content, alert.text, "Conteúdo do alerta nativo não corresponde.")
-            
-            if accept:
-                alert.accept()
-            else:
-                alert.dismiss()
-            time.sleep(0.5)
-            return True # Alerta nativo tratado
-        except (TimeoutException, NoAlertPresentException):
-            # Se não for alerta nativo, tenta como diálogo Flutter
-            if self._is_element_present(LOC_ALERT_DIALOG_GENERIC, timeout=self.SHORT_WAIT_TIMEOUT):
-                print("Diálogo Flutter (baseado em LOC_ALERT_DIALOG_GENERIC) encontrado.")
-                if expected_title:
-                    self._wait_for_text_visibility(expected_title, context=self._find_element_with_wait(LOC_ALERT_DIALOG_GENERIC))
-                if expected_content:
-                    self._wait_for_text_visibility(expected_content, context=self._find_element_with_wait(LOC_ALERT_DIALOG_GENERIC))
-                
-                if accept:
-                    self._click_element_with_wait(LOC_ALERT_DIALOG_OK_BUTTON, context=self._find_element_with_wait(LOC_ALERT_DIALOG_GENERIC))
-                else:
-                    # Implementar lógica para botão de cancelar se houver
-                    self.fail("Lógica de 'dismiss' para diálogo Flutter não implementada neste helper.")
-                time.sleep(0.5)
-                return True # Diálogo Flutter tratado
-        return False # Nenhum alerta/diálogo encontrado ou tratado
+    def _check_flutter_alert_and_dismiss(self, expected_title, expected_content, ok_button_key):
+        """Verifica o título e conteúdo de um AlertDialog Flutter e clica no botão OK."""
+        self.assertTrue(self._is_text_present(expected_title, timeout=5), f"Título do alerta '{expected_title}' não encontrado.")
+        self.assertTrue(self._is_text_present(expected_content, timeout=5), f"Conteúdo do alerta '{expected_content}' não encontrado.")
+        
+        ok_button = self._find_element_by_value_key(ok_button_key)
+        self._tap_element(ok_button)
+        time.sleep(0.5) # Esperar o diálogo fechar
 
+        # Verifica se o diálogo desapareceu (o título não deve mais estar presente)
+        self.assertFalse(self._is_text_present(expected_title, timeout=2), "Alerta Flutter não desapareceu após clicar em OK.")
 
-    def _navigate_to_click_page(self, username='admin', password='1234'):
+    def _navigate_to_click_page(self):
         """Faz login (se necessário) e navega para a ClickPage."""
-        time.sleep(1)
+        # Esta é uma navegação de exemplo. Adapte com suas chaves reais.
+        # Se o app já inicia na HomePage ou ClickPage, simplifique ou remova esta parte.
+        
+        # Tenta fazer login se estiver na LoginPage
+        # (Assumindo que a LoginPage tem um elemento identificável, como o campo de usuário)
+        if self._is_element_present_by_value_key(LOGIN_USERNAME_FIELD_KEY, timeout=5):
+            print("Realizando login...")
+            username_field = self._find_element_by_value_key(LOGIN_USERNAME_FIELD_KEY)
+            password_field = self._find_element_by_value_key(LOGIN_PASSWORD_FIELD_KEY)
+            login_button = self._find_element_by_value_key(LOGIN_BUTTON_KEY)
 
-        if self._is_element_present(LOC_LOGIN_PAGE_INDICATOR, timeout=self.SHORT_WAIT_TIMEOUT):
-            self._type_text_with_wait(LOC_USERNAME_FIELD, username)
-            self._type_text_with_wait(LOC_PASSWORD_FIELD, password)
-            self._click_element_with_wait(LOC_LOGIN_BUTTON)
-            self._find_element_with_wait(LOC_HOME_PAGE_INDICATOR, timeout=self.LONG_WAIT_TIMEOUT)
+            username_field.send_keys("admin") # Usuário de teste
+            password_field.send_keys("1234")  # Senha de teste
+            self._tap_element(login_button)
             time.sleep(1)
 
-        self.assertTrue(self._is_element_present(LOC_HOME_PAGE_INDICATOR), "Não foi possível alcançar a HomePage.")
-        self._click_element_with_wait(LOC_CLICK_AND_HOLD_BUTTON_ON_HOME)
-        self._find_element_with_wait(LOC_CLICK_PAGE_INDICATOR, timeout=self.LONG_WAIT_TIMEOUT) # Espera um elemento único da ClickPage
+        # Espera pela HomePage e navega para ClickPage
+        print("Navegando para ClickPage...")
+        self._find_element_by_value_key(HOME_PAGE_INDICATOR_KEY) # Confirma que está na HomePage
+        click_page_nav_button = self._find_element_by_value_key(HOME_CLICK_PAGE_BUTTON_KEY)
+        self._tap_element(click_page_nav_button)
+
+        # Confirma que está na ClickPage
+        self._find_element_by_value_key(CLICK_PAGE_APPBAR_TITLE_KEY)
         time.sleep(0.5)
 
     # --- Test Method ---
-    def test_click_interactions(self):
+    def test_01_double_tap_interaction(self):
         self._navigate_to_click_page()
 
-        # Garante que está na ClickPage (verificado em _navigate_to_click_page)
-        self.assertTrue(self._is_element_present(LOC_CLICK_PAGE_INDICATOR), "ClickPage não foi carregada.")
+        double_tap_card = self._find_element_by_value_key(CLICK_PAGE_DOUBLE_TAP_CARD_KEY)
+        self.assertIsNotNone(double_tap_card, "Card de duplo clique não encontrado.")
 
-        # --- Teste do Card de Duplo Clique ---
-        double_tap_card = self._find_element_with_wait(LOC_DOUBLE_TAP_CARD)
-        self.assertIsNotNone(double_tap_card, "Card de duplo clique não encontrado")
-
-        self._perform_double_tap(double_tap_card)
+        print("Realizando duplo clique...")
+        self._perform_double_tap_on_element(double_tap_card)
         
-        alert_handled_double_tap = self._handle_alert_if_present(
-            accept=True,
+        print("Verificando alerta de duplo clique...")
+        self._check_flutter_alert_and_dismiss(
             expected_title=TEXT_ALERT_DOUBLE_TAP_TITLE,
-            expected_content=TEXT_ALERT_DOUBLE_TAP_CONTENT
+            expected_content=TEXT_ALERT_DOUBLE_TAP_CONTENT,
+            ok_button_key=CLICK_PAGE_ALERT_OK_BUTTON_KEY
         )
-        self.assertTrue(alert_handled_double_tap, "Alerta/Diálogo de duplo clique não apareceu ou não foi tratado.")
-        
-        # Verifica se o AlertDialog (se for Flutter dialog) desapareceu
-        if not (isinstance(alert_handled_double_tap, bool) and alert_handled_double_tap and EC.alert_is_present()(self.driver) is False): # Se foi alerta nativo, já sumiu
-             self.assertFalse(self._is_element_present(LOC_ALERT_DIALOG_GENERIC, timeout=1),
-                             "Diálogo Flutter de duplo clique não desapareceu.")
         print("Teste de duplo clique concluído.")
 
-        # --- Teste do Card de Clique Longo ---
-        long_press_card = self._find_element_with_wait(LOC_LONG_PRESS_CARD)
-        self.assertIsNotNone(long_press_card, "Card de clique longo não encontrado")
+    def test_02_long_press_interaction(self):
+        # Assume que já está na ClickPage do teste anterior ou navega novamente
+        # Para garantir isolamento, poderia chamar _navigate_to_click_page() aqui também,
+        # mas se os testes rodam em ordem e o estado é mantido, não é estritamente necessário.
+        # Se não navegou, descomente:
+        # self._navigate_to_click_page() 
+        # Ou garanta que a página ainda é a ClickPage:
+        self._find_element_by_value_key(CLICK_PAGE_APPBAR_TITLE_KEY)
 
-        self._perform_long_press(long_press_card)
+        long_press_card = self._find_element_by_value_key(CLICK_PAGE_LONG_PRESS_CARD_KEY)
+        self.assertIsNotNone(long_press_card, "Card de clique longo não encontrado.")
 
-        alert_handled_long_press = self._handle_alert_if_present(
-            accept=True,
+        print("Realizando clique longo...")
+        self._perform_long_press_on_element(long_press_card)
+
+        print("Verificando alerta de clique longo...")
+        self._check_flutter_alert_and_dismiss(
             expected_title=TEXT_ALERT_LONG_PRESS_TITLE,
-            expected_content=TEXT_ALERT_LONG_PRESS_CONTENT
+            expected_content=TEXT_ALERT_LONG_PRESS_CONTENT,
+            ok_button_key=CLICK_PAGE_ALERT_OK_BUTTON_KEY
         )
-        self.assertTrue(alert_handled_long_press, "Alerta/Diálogo de clique longo não apareceu ou não foi tratado.")
-
-        if not (isinstance(alert_handled_long_press, bool) and alert_handled_long_press and EC.alert_is_present()(self.driver) is False):
-            self.assertFalse(self._is_element_present(LOC_ALERT_DIALOG_GENERIC, timeout=1),
-                             "Diálogo Flutter de clique longo não desapareceu.")
         print("Teste de clique longo concluído.")
 
-
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(ClickPageTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    if APP_PATH == "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI":
+        print("ERRO: A variável APP_PATH não foi configurada no script.")
+        print("Por favor, edite o arquivo e defina o caminho para o seu APK/APP.")
+    else:
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(ClickPageTests))
+        runner = unittest.TextTestRunner(verbosity=2)
+        print(f"Iniciando testes para o app: {APP_PATH}")
+        print(f"Conectando ao servidor Appium em: {APPIUM_HOST}")
+        runner.run(suite)

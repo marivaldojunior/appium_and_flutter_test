@@ -2,23 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:appium_and_flutter_test/main.dart' as app;
+import 'package:appium_and_flutter_test/pages/home_page.dart'; // Adicionado
+import 'package:appium_and_flutter_test/pages/login_page.dart'; // Adicionado
 import 'package:appium_and_flutter_test/pages/forms_page.dart';
 import 'package:intl/intl.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Testes de Integração da FormsPage', () {
-    Future<void> _ensurePageLoaded(WidgetTester tester) async {
-      app.main(); // Ou navegue para a FormsPage se não for a inicial
-      await tester.pumpAndSettle();
-      expect(find.byType(FormsPage), findsOneWidget);
+  Future<void> _navigateToFormsPage(WidgetTester tester) async {
+    app.main(); // Inicia o app
+    // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    // Se estiver na LoginPage, realiza o login
+    if (tester.any(find.byType(LoginPage))) {
+      await tester.enterText(
+        find.byKey(LoginPage.usernameFieldKey),
+        'admin', // Use um usuário válido padrão para testes
+      );
+      await tester.enterText(
+        find.byKey(LoginPage.passwordFieldKey),
+        '1234', // Use uma senha válida padrão para testes
+      );
+      await tester.tap(find.byKey(LoginPage.loginButtonKey));
+      // Aguarda o login, navegação para HomePage e desaparecimento do SnackBar
+      await tester.pumpAndSettle(const Duration(seconds: 3));
     }
 
+    // Garante que está na HomePage
+    expect(
+      find.byType(HomePage),
+      findsOneWidget,
+      reason: "Não foi possível alcançar a HomePage.",
+    );
+
+    // Navega para FormsPage
+    await tester.tap(
+      find.byKey(HomePage.formsButtonKey),
+    ); // Usa a key do botão na HomePage
+    await tester.pumpAndSettle(); // Aguarda a navegação
+  }
+
+  group('Testes de Integração da FormsPage', () {
     testWidgets('Preenche e submete o formulário com dados válidos', (
       WidgetTester tester,
     ) async {
-      await _ensurePageLoaded(tester);
+      await _navigateToFormsPage(tester);
 
       // 1. Preencher Nome
       await tester.enterText(find.byKey(FormsPage.nameFieldKey), 'Nome Teste');
@@ -167,7 +197,7 @@ void main() {
     testWidgets('Exibe mensagens de validação para campos obrigatórios', (
       WidgetTester tester,
     ) async {
-      await _ensurePageLoaded(tester);
+      await _navigateToFormsPage(tester);
 
       // Tenta submeter o formulário vazio
       // Scroll até o botão de submit para garantir visibilidade
@@ -199,7 +229,7 @@ void main() {
     testWidgets('Validação específica de email e idade', (
       WidgetTester tester,
     ) async {
-      await _ensurePageLoaded(tester);
+      await _navigateToFormsPage(tester);
 
       // Email inválido
       await tester.enterText(
@@ -238,7 +268,7 @@ void main() {
     testWidgets(
       'Interação com DatePicker, Switch, Checkbox, Radio e Dropdown',
       (WidgetTester tester) async {
-        await _ensurePageLoaded(tester);
+        await _navigateToFormsPage(tester);
 
         // DatePicker
         expect(find.text('Selecione a Data de Nascimento'), findsOneWidget);
