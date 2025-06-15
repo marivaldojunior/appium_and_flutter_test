@@ -145,8 +145,8 @@ class HomePageTests(unittest.TestCase):
 
     def _navigate_to_section_and_back(self, button_locator, page_indicator_locator, section_name):
         """Clica em um botão, verifica a navegação e volta."""
-        self._tap_element(button_locator_key)
-        self._find_element_by_value_key(page_indicator_key, timeout=15)
+        self._tap_element(button_locator)
+        self._find_element_by_value_key(page_indicator_locator, timeout=15)
         print(f"Navegou para {section_name} com sucesso.")
         self._navigate_back()
         self._find_element_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY) # Confirma retorno à HomePage

@@ -162,8 +162,7 @@ class ListViewPageTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if self.driver:
-            self.driver.quit()
+        if hasattr(cls, 'driver') and cls.driver:
             cls.driver.quit()
 
     # --- Helper Methods ---

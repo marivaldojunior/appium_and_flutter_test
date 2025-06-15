@@ -59,6 +59,7 @@ class LoginPageTests(unittest.TestCase):
         options.set_capability('newCommandTimeout', 120)
         options.set_capability('noReset', True) # Para não limpar dados entre testes (opcional)
 
+        # Inicializa o driver Appium de acordo com a documentação oficial
         cls.driver = webdriver.Remote(command_executor=APPIUM_HOST, options=options)
         cls.finder = FlutterFinder()
         cls.wait = WebDriverWait(cls.driver, 30) # Timeout padrão para elementos
@@ -212,50 +213,6 @@ if __name__ == '__main__':
         print(f"Iniciando testes de Login para o app: {APP_PATH}")
         print(f"Conectando ao servidor Appium em: {APPIUM_HOST}")
         runner.run(suite)
-        try:
-            username_field = self.find_element_with_retry(AppiumBy.ACCESSIBILITY_ID, "Usuário")
-        except: # Tentar XPath se ACCESSIBILITY_ID não funcionar
-            print("ACCESSIBILITY_ID 'Usuário' não encontrado, tentando XPath...")
-            # Este XPath é um exemplo e pode precisar de ajuste:
-            username_field = self.find_element_with_retry(AppiumBy.XPATH, "//*[@text='Usuário']")
-
-
-        print("Localizando campo de senha...")
-        try:
-            password_field = self.find_element_with_retry(AppiumBy.ACCESSIBILITY_ID, "Senha")
-        except:
-            print("ACCESSIBILITY_ID 'Senha' não encontrado, tentando XPath...")
-            password_field = self.find_element_with_retry(AppiumBy.XPATH, "//*[@text='Senha']")
-
-        print("Localizando botão de login...")
-        # O ElevatedButton com child: Text('Entrar') deve ter 'Entrar' como 'name' ou 'text'
-        login_button = self.find_element_with_retry(AppiumBy.XPATH, "//*[@text='Entrar']")
-        # Ou, se o Semantics(label=...) no ElevatedButton estivesse ativo:
-        # login_button = self.find_element_with_retry(AppiumBy.ACCESSIBILITY_ID, "Botão para efetuar login")
-
-
-        # 2. Digitar nos campos
-        print("Digitando usuário...")
-        username_field.send_keys("admin")
-        print("Digitando senha...")
-        password_field.send_keys("1234")
-
-        # 3. Clicar no botão de login
-        print("Clicando no botão de login...")
-        login_button.click()
-
-        # 4. Verificar o SnackBar de sucesso
-        # O SnackBar tem a key 'login_snackbar_success'
-        # Com Appium Flutter Driver: self.find_element_with_retry(AppiumBy.FLUTTER, 'login_snackbar_success')
-        # Sem ele, o texto do SnackBar é a melhor aposta.
-        print("Verificando SnackBar de sucesso...")
-        success_message = self.find_element_with_retry(AppiumBy.XPATH, "//*[@text='Login bem-sucedido!']")
-        self.assertTrue(success_message.is_displayed(), "Mensagem de sucesso do login não encontrada.")
-        print("Teste de login bem-sucedido CONCLUÍDO.")
-
-        # Opcional: Verificar navegação para HomePage (se houver um elemento único lá)
-        # home_page_element = self.find_element_with_retry(AppiumBy.XPATH, "//*[@text='Bem-vindo à HomePage!']") # Exemplo
-        # self.assertTrue(home_page_element.is_displayed(), "Não navegou para a HomePage.")
 
 
     def test_failed_login_wrong_credentials(self):

@@ -98,7 +98,7 @@ class GestosPageTests(unittest.TestCase):
         touch_action.press(x=start_x, y=start_y).wait(ms=300).move_to(x=end_x, y=end_y).release().perform()
         time.sleep(0.5) # Pequena pausa para a renderização do desenho
 
-    def _tap_element(self, element_or_key): # Adicionado helper
+    def _tap_element(self, element_or_key): # Helper para clicar em elemento por key ou objeto
         if isinstance(element_or_key, str):
             element = self._find_element_by_value_key(element_or_key)
         else:
