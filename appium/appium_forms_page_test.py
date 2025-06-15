@@ -56,21 +56,25 @@ class FormsPageTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if APP_PATH == "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI":
-            raise ValueError("Por favor, atualize a variável APP_PATH com o caminho para o seu APK/APP.")
-
-        options = AppiumOptions()
-        options.set_capability('platformName', 'Android') # Ou 'iOS'
-        options.set_capability('automationName', 'Flutter')
-        options.set_capability('deviceName', 'Android Emulator') # Substitua pelo seu dispositivo/emulador
-        options.set_capability('app', APP_PATH)
+        """Configuração do driver do Appium."""
+        # Ajuste as capacidades conforme necessário para seu ambiente.
+        capabilities = dict(
+            platformName='Android',  # ou 'iOS'
+            deviceName='Android Emulator', # Valor comum nos seus testes
+            appPackage='com.example.appium_and_flutter_test', # Pacote do seu app
+            appActivity='.MainActivity', # Atividade principal do seu app
+            automationName='Flutter'  # Usado para testes Flutter
+        )
+        options = AppiumOptions().load_capabilities(capabilities)
+        # Adicionando outras opções comuns nos seus testes:
+        options.set_capability('app', "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI") # Lembre-se de definir isso
         options.set_capability('retryBackoffTime', 500)
-        options.set_capability('maxRetryCount', 5) # Aumentado para formulários mais complexos
-        options.set_capability('newCommandTimeout', 300) # Aumentado para interações mais longas
+        options.set_capability('maxRetryCount', 3)
+        options.set_capability('newCommandTimeout', 120) # Ou outro valor dependendo da complexidade da página
 
-        cls.driver = webdriver.Remote(command_executor=APPIUM_HOST, options=options)
-        cls.finder = FlutterFinder()
-        cls.wait = WebDriverWait(cls.driver, 40) # Timeout aumentado
+        cls.driver = webdriver.Remote('http://127.0.0.1:4723', options=options) # URL do servidor Appium
+        cls.wait = WebDriverWait(cls.driver, 30)  # Timeout comum nos seus testes
+        cls.finder = FlutterFinder() # Adicionado, pois é usado em todos os seus testes Appium/Flutter
 
     @classmethod
     def tearDownClass(cls):

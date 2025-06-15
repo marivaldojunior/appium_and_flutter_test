@@ -9,7 +9,7 @@ import time
 
 class LoginPageTests(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self): 
         """Configuração do driver do Appium."""
         # Ajuste as capacidades conforme necessário para seu ambiente.
         capabilities = dict(
