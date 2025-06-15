@@ -101,6 +101,7 @@ DIALOG_CANCEL_BUTTON_KEY = 'dialog_cancel_button'
 # Delete Confirmation Dialog
 DELETE_CONFIRM_DIALOG_KEY = 'delete_confirm_dialog' # Key do AlertDialog em si
 DELETE_CONFIRM_DELETE_BUTTON_KEY = 'delete_confirm_dialog_delete_button'
+DELETE_CONFIRM_DIALOG_CANCEL_BUTTON_KEY = 'delete_confirm_dialog_cancel_button'
 DELETE_CONFIRM_CANCEL_BUTTON_KEY = 'delete_confirm_dialog_cancel_button'
 
 # Textos para validação, SnackBars, etc.
