@@ -9,7 +9,7 @@ import 'package:appium_and_flutter_test/pages/recursos_page.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> _navigateToRecursosPage(WidgetTester tester) async {
+  Future<void> navigateToRecursosPage(WidgetTester tester) async {
     app.main(); // Inicia o app
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -40,7 +40,7 @@ void main() {
     testWidgets(
       'Verifica UI inicial e interage com seletores de imagem (simulando nenhuma seleção)',
       (WidgetTester tester) async {
-        await _navigateToRecursosPage(tester);
+        await navigateToRecursosPage(tester);
 
         // 1. Verifica estado inicial da UI
         expect(find.byKey(RecursosPage.imageDisplayAreaKey), findsOneWidget);

@@ -1,6 +1,5 @@
 import 'package:appium_and_flutter_test/pages/home_page.dart';
 import 'package:appium_and_flutter_test/pages/login_page.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:appium_and_flutter_test/main.dart' as app;
@@ -9,7 +8,7 @@ import 'package:appium_and_flutter_test/pages/click_page.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> _navigateToClickPage(WidgetTester tester) async {
+  Future<void> navigateToClickPage(WidgetTester tester) async {
     app.main(); // Inicia o app
     // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -45,7 +44,7 @@ void main() {
     testWidgets('Interage com double tap e long press cards exibindo alertas', (
       WidgetTester tester,
     ) async {
-      await _navigateToClickPage(tester);
+      await navigateToClickPage(tester);
 
       // Garante que está na ClickPage
       expect(

@@ -10,7 +10,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Testes de Integração da GestosPage', () {
-    Future<void> _navigateToGestosPage(WidgetTester tester) async {
+    Future<void> navigateToGestosPage(WidgetTester tester) async {
       app.main(); // Inicia o app
       // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -86,7 +86,7 @@ void main() {
     testWidgets('Desenha, muda cor, muda espessura e limpa a área de desenho', (
       WidgetTester tester,
     ) async {
-      await _navigateToGestosPage(tester);
+      await navigateToGestosPage(tester);
 
       // 1. Estado Inicial
       SignaturePainter painter = getSignaturePainter(tester);
@@ -167,10 +167,12 @@ void main() {
       final double clampedRelativeTapX = relativeTapX.clamp(0.0, 1.0);
 
       // Toca no slider na posição relativa calculada
-      //await tester.tap(
-      //  sliderFinder,
-      //  relative: Offset(clampedRelativeTapX, 0.5),
-      //);
+      final sliderRect = tester.getRect(sliderFinder);
+      final Offset tapPosition = Offset(
+        sliderRect.left + sliderRect.width * clampedRelativeTapX,
+        sliderRect.top + sliderRect.height * 0.5,
+      );
+      await tester.tapAt(tapPosition);
       await tester.pumpAndSettle();
 
       // Verifica se o valor do slider foi atualizado

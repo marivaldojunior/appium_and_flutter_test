@@ -9,7 +9,7 @@ import 'package:appium_and_flutter_test/pages/listview_page.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> _navigateToListViewPage(WidgetTester tester) async {
+  Future<void> navigateToListViewPage(WidgetTester tester) async {
     app.main(); // Inicia o app
     // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -79,7 +79,7 @@ void main() {
     testWidgets('Adiciona, edita, exclui itens e verifica interações da lista', (
       WidgetTester tester,
     ) async {
-      await _navigateToListViewPage(tester);
+      await navigateToListViewPage(tester);
 
       // 1. Verifica itens iniciais
       expect(find.text('Item 1'), findsOneWidget);

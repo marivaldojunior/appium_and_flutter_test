@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> _navigateToFormsPage(WidgetTester tester) async {
+  Future<void> navigateToFormsPage(WidgetTester tester) async {
     app.main(); // Inicia o app
     // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -48,7 +48,7 @@ void main() {
     testWidgets('Preenche e submete o formulário com dados válidos', (
       WidgetTester tester,
     ) async {
-      await _navigateToFormsPage(tester);
+      await navigateToFormsPage(tester);
 
       // 1. Preencher Nome
       await tester.enterText(find.byKey(FormsPage.nameFieldKey), 'Nome Teste');
@@ -187,17 +187,17 @@ void main() {
       expect(radioMasculino.groupValue, isNull);
 
       // Verifica se o dropdown foi resetado
-      final dropdown = tester.widget<DropdownButtonFormField<String>>(
+      final dropdown = tester.widget<DropdownButtonFormField<String?>>(
         find.byKey(FormsPage.countryDropdownKey),
       );
-      //expect(dropdown.value, isNull);
+      expect(dropdown.initialValue, isNull);
       expect(find.text('Descrição de teste.'), findsNothing);
     });
 
     testWidgets('Exibe mensagens de validação para campos obrigatórios', (
       WidgetTester tester,
     ) async {
-      await _navigateToFormsPage(tester);
+      await navigateToFormsPage(tester);
 
       // Tenta submeter o formulário vazio
       // Scroll até o botão de submit para garantir visibilidade
@@ -229,7 +229,7 @@ void main() {
     testWidgets('Validação específica de email e idade', (
       WidgetTester tester,
     ) async {
-      await _navigateToFormsPage(tester);
+      await navigateToFormsPage(tester);
 
       // Email inválido
       await tester.enterText(
@@ -268,7 +268,7 @@ void main() {
     testWidgets(
       'Interação com DatePicker, Switch, Checkbox, Radio e Dropdown',
       (WidgetTester tester) async {
-        await _navigateToFormsPage(tester);
+        await navigateToFormsPage(tester);
 
         // DatePicker
         expect(find.text('Selecione a Data de Nascimento'), findsOneWidget);

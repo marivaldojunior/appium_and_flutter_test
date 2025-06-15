@@ -23,7 +23,7 @@ void main() {
     }
   }
 
-  Future<void> _ensureLoggedInAndOnHomePage(WidgetTester tester) async {
+  Future<void> ensureLoggedInAndOnHomePage(WidgetTester tester) async {
     app.main(); // Inicia o app
     await tester.pumpAndSettle(
       const Duration(seconds: 1),
@@ -56,7 +56,7 @@ void main() {
     testWidgets('Verifica elementos da UI e navegação para todas as seções', (
       WidgetTester tester,
     ) async {
-      await _ensureLoggedInAndOnHomePage(tester);
+      await ensureLoggedInAndOnHomePage(tester);
 
       // Garante que estamos na HomePage (caso algum teste anterior tenha navegado)
       // Se o setUpAll já garante isso, esta verificação pode ser redundante,
@@ -122,7 +122,7 @@ void main() {
     testWidgets('Testa funcionalidade de Logout (Cancelar e Confirmar)', (
       WidgetTester tester,
     ) async {
-      await _ensureLoggedInAndOnHomePage(tester);
+      await ensureLoggedInAndOnHomePage(tester);
 
       // Garante que estamos na HomePage
       if (find.byType(HomePage).evaluate().isEmpty) {
