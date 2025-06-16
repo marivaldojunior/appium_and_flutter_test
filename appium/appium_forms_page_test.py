@@ -67,7 +67,7 @@ class FormsPageTests(unittest.TestCase):
         )
         options = AppiumOptions().load_capabilities(capabilities)
         # Adicionando outras opções comuns nos seus testes:
-        options.set_capability('app', "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI") # Lembre-se de definir isso
+        options.set_capability('app-debug.apk', "D:\\repos\\appium_and_flutter_test\\build\\app\\outputs\\flutter-apk\\app-debug.apk")
         options.set_capability('retryBackoffTime', 500)
         options.set_capability('maxRetryCount', 3)
         options.set_capability('newCommandTimeout', 120) # Ou outro valor dependendo da complexidade da página
