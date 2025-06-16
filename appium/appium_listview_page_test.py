@@ -1,4 +1,3 @@
-# d:\repos\appium_and_flutter_test\integration_test\listview_page_test.py
 import unittest
 import time
 import os

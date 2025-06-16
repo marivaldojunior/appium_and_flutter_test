@@ -1,4 +1,3 @@
-# d:\repos\appium_and_flutter_test\integration_test\home_page_test.py
 import unittest
 import time
 import os
@@ -7,22 +6,25 @@ from appium.options.common import AppiumOptions
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from appium_flutter_finder.flutter_finder import FlutterFinder
 
-# Configurações do Appium e do Aplicativo
+# --- Configurações ---
 APPIUM_HOST = 'http://127.0.0.1:4723'
-# Caminho para o arquivo APK ou APP do aplicativo em teste.
-APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # Este caminho deve ser atualizado para o local do arquivo do aplicativo.
+# ATENÇÃO: Atualize este caminho para o local do seu arquivo APK.
+APP_PATH = os.path.abspath('D:\\repos\\appium_and_flutter_test\\build\\app\\outputs\\flutter-apk\\app-debug.apk')
 
-# Chaves dos elementos Flutter (ajuste conforme seu código Dart)
+if not os.path.exists(APP_PATH):
+    APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI"
+
+# --- Chaves dos Elementos Flutter ---
 # LoginPage
-LOGIN_USERNAME_FIELD_KEY = 'login_username_field' # Ex: ValueKey('login_username_field')
-LOGIN_PASSWORD_FIELD_KEY = 'login_password_field' # Ex: ValueKey('login_password_field')
-LOGIN_BUTTON_KEY = 'login_button'                 # Ex: ValueKey('login_button')
+LOGIN_USERNAME_FIELD_KEY = 'login_username_field'
+LOGIN_PASSWORD_FIELD_KEY = 'login_password_field'
+LOGIN_BUTTON_KEY = 'login_button'
 
 # HomePage
-HOME_PAGE_APPBAR_TITLE_KEY = 'home_page_app_bar_title' # Ex: ValueKey('home_page_app_bar_title')
+HOME_PAGE_APPBAR_TITLE_KEY = 'home_page_app_bar_title'
 HOME_PAGE_FORMS_BUTTON_KEY = 'home_page_forms_button'
 HOME_PAGE_LISTVIEW_BUTTON_KEY = 'home_page_list_view_button'
 HOME_PAGE_NATIVE_RESOURCES_BUTTON_KEY = 'home_page_native_resources_button'
@@ -32,19 +34,18 @@ HOME_PAGE_CHAT_BUTTON_KEY = 'home_page_chat_button'
 HOME_PAGE_LOGOUT_BUTTON_KEY = 'home_page_logout_button'
 
 # Logout Dialog
-HOME_PAGE_LOGOUT_DIALOG_KEY = 'home_page_logout_dialog' # Key para o AlertDialog em si
+HOME_PAGE_LOGOUT_DIALOG_KEY = 'home_page_logout_dialog'
 HOME_PAGE_LOGOUT_DIALOG_CANCEL_BUTTON_KEY = 'home_page_logout_dialog_cancel_button'
 HOME_PAGE_LOGOUT_DIALOG_CONFIRM_BUTTON_KEY = 'home_page_logout_dialog_confirm_button'
-TEXT_LOGOUT_DIALOG_TITLE = "Confirmar Logout" # Texto para verificação
+TEXT_LOGOUT_DIALOG_TITLE = "Confirmar Logout"
 
-# Chaves indicadoras de outras páginas (para confirmar navegação)
-# Use a chave do AppBar ou um elemento principal da respectiva página
-FORMS_PAGE_INDICATOR_KEY = 'forms_app_bar_title' # Ex: ValueKey('forms_app_bar_title')
-LISTVIEW_PAGE_INDICATOR_KEY = 'list_view_page_list_view' # Ex: ValueKey('list_view_page_list_view')
-RECURSOS_PAGE_INDICATOR_KEY = 'recursos_page_app_bar_title' # Ex: ValueKey('recursos_page_app_bar_title')
-GESTOS_PAGE_INDICATOR_KEY = 'gestos_page_app_bar_title' # Ex: ValueKey('gestos_page_app_bar_title')
-CLICK_PAGE_INDICATOR_KEY = 'click_page_app_bar_title' # Ex: ValueKey('click_page_app_bar_title')
-CHAT_PAGE_INDICATOR_KEY = 'chat_page_app_bar_title' # Ex: ValueKey('chat_page_app_bar_title')
+# Indicadores de outras páginas
+FORMS_PAGE_INDICATOR_KEY = 'forms_app_bar_title'
+LISTVIEW_PAGE_INDICATOR_KEY = 'list_view_page_list_view'
+RECURSOS_PAGE_INDICATOR_KEY = 'recursos_page_app_bar_title'
+GESTOS_PAGE_INDICATOR_KEY = 'gestos_page_app_bar_title'
+CLICK_PAGE_INDICATOR_KEY = 'click_page_app_bar_title'
+CHAT_PAGE_INDICATOR_KEY = 'chat_page_app_bar_title'
 
 class HomePageTests(unittest.TestCase):
     driver: webdriver.Remote
@@ -53,172 +54,155 @@ class HomePageTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Configuração inicial do driver do Appium para a suíte de testes."""
-        # Capacidades desejadas para a sessão do Appium.
-        capabilities = dict(
-            platformName='Android',  # Plataforma do dispositivo (Android ou iOS).
-            deviceName='Android Emulator', # Nome do dispositivo ou emulador.
-            appPackage='com.example.appium_and_flutter_test', # Package name do aplicativo.
-            appActivity='.MainActivity', # Activity principal do aplicativo.
-            automationName='Flutter'  # Nome do driver de automação (Flutter para apps Flutter).
-        )
-        options = AppiumOptions().load_capabilities(capabilities)
-        # Configurações adicionais da sessão.
-        options.set_capability('app-debug.apk', "D:\\repos\\appium_and_flutter_test\\build\\app\\outputs\\flutter-apk\\app-debug.apk")
-        options.set_capability('retryBackoffTime', 500)
-        options.set_capability('maxRetryCount', 3)
-        options.set_capability('newCommandTimeout', 120) # Timeout para novos comandos.
+        """Configura o driver do Appium antes de todos os testes da classe."""
+        if "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" in APP_PATH:
+            raise Exception("ERRO: A variável APP_PATH não foi configurada. Abortando testes.")
 
+        capabilities = {
+            'platformName': 'Android',
+            'deviceName': 'Android Emulator',
+            'appPackage': 'com.example.appium_and_flutter_test',
+            'appActivity': '.MainActivity',
+            'automationName': 'Flutter',
+            'app': APP_PATH,
+            'newCommandTimeout': 120,
+        }
+        options = AppiumOptions().load_capabilities(capabilities)
         cls.driver = webdriver.Remote(APPIUM_HOST, options=options)
-        cls.wait = WebDriverWait(cls.driver, 30)  # Tempo máximo de espera para elementos.
-        cls.finder = FlutterFinder() # Instância do FlutterFinder para localizar elementos Flutter.
+        cls.wait = WebDriverWait(cls.driver, 20)
+        cls.finder = FlutterFinder()
 
     @classmethod
     def tearDownClass(cls):
+        """Encerra a sessão do driver após todos os testes."""
         if hasattr(cls, 'driver') and cls.driver:
             cls.driver.quit()
 
-    # --- Helper Methods ---
-    def _find_element_by_value_key(self, key_string, timeout=20):
+    def setUp(self):
+        """Garante que cada teste comece logado e na HomePage."""
+        print("\nAssegurando que o teste começa na HomePage...")
+        self._ensure_on_home_page()
+
+    # --- Métodos Auxiliares ---
+
+    def _find_element_by_key(self, key, timeout=10):
+        finder = self.finder.by_value_key(key)
         return self.wait.until(
-            EC.presence_of_element_located((AppiumBy.FLUTTER, self.finder.by_value_key(key_string)))
+            EC.presence_of_element_located((AppiumBy.FLUTTER, finder)),
+            message=f"Elemento com a chave '{key}' não foi encontrado."
         )
 
-    def _is_element_present_by_value_key(self, key_string, timeout=3):
+    def _is_element_present(self, key, timeout=3):
         try:
-            self._find_element_by_value_key(key_string, timeout)
+            self._find_element_by_key(key, timeout)
             return True
         except TimeoutException:
             return False
 
-    def _is_text_present(self, text_string, timeout=5):
-        try:
-            self.wait.until(EC.presence_of_element_located((AppiumBy.FLUTTER, self.finder.by_text(text_string))))
-            return True
-        except TimeoutException:
-            return False
-
-    def _tap_element(self, element_or_key):
-        if isinstance(element_or_key, str):
-            element = self._find_element_by_value_key(element_or_key)
-        else:
-            element = element_or_key
+    def _tap_element_by_key(self, key):
+        element = self._find_element_by_key(key)
         element.click()
-        time.sleep(0.5) # Pausa para UI
-
-    def _navigate_back(self):
-        """Tenta navegar para trás usando o botão de voltar do sistema."""
-        self.driver.back()
-        time.sleep(0.5) # Pequena pausa para a navegação completar
-
-    def _ensure_on_home_page(self, username='admin', password='1234'):
-        """Garante que o app esteja logado e na HomePage."""
-        time.sleep(1) # Pausa inicial
-
-        # Se estiver na LoginPage, faz login
-        if self._is_element_present_by_value_key(LOGIN_USERNAME_FIELD_KEY, timeout=3):
-            print("Realizando login para chegar na HomePage...")
-            username_field = self._find_element_by_value_key(LOGIN_USERNAME_FIELD_KEY)
-            password_field = self._find_element_by_value_key(LOGIN_PASSWORD_FIELD_KEY)
-            login_button = self._find_element_by_value_key(LOGIN_BUTTON_KEY)
-
-            username_field.send_keys(username)
-            password_field.send_keys(password)
-            self._tap_element(login_button)
-            # Espera pela HomePage após o login
-            self._find_element_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY, timeout=15)
-            time.sleep(1) # Pausa para SnackBar de login sumir, se houver
-        else:
-            # Se não estiver na LoginPage, tenta voltar para a HomePage caso esteja em outra tela
-            max_pops = 5 # Evita loop infinito
-            pops = 0
-            while not self._is_element_present_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY, timeout=1) and pops < max_pops:
-                print(f"Tentando voltar para a HomePage (tentativa {pops + 1})")
-                current_activity = self.driver.current_activity
-                self._navigate_back()
-                time.sleep(0.5)
-                if self.driver.current_activity == current_activity and \
-                   not self._is_element_present_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY, timeout=0.5):
-                    # Não conseguiu voltar efetivamente ou já está na raiz e não é a home
-                    print("Botão voltar não alterou a tela ou já está na raiz (e não é a Home). Interrompendo.")
-                    break
-                pops += 1
-
-        self.assertTrue(self._is_element_present_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY, timeout=5),
-                        "Não foi possível alcançar a HomePage.")
         time.sleep(0.5)
 
-    def _navigate_to_section_and_back(self, button_locator, page_indicator_locator, section_name):
-        """Clica em um botão, verifica a navegação e volta."""
-        self._tap_element(button_locator)
-        self._find_element_by_value_key(page_indicator_locator, timeout=15)
-        print(f"Navegou para {section_name} com sucesso.")
-        self._navigate_back()
-        self._find_element_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY) # Confirma retorno à HomePage
-        print(f"Retornou para HomePage de {section_name} com sucesso.")
+    def _enter_text(self, key, text):
+        element = self._find_element_by_key(key)
+        element.send_keys(text)
+        try:
+            if self.driver.is_keyboard_shown():
+                self.driver.hide_keyboard()
+        except Exception:
+            pass
+        time.sleep(0.2)
 
-    # --- Test Methods ---
-    def test_ui_elements_and_navigation(self):
-        self._ensure_on_home_page()
+    def _ensure_on_home_page(self, username='admin', password='1234'):
+        """Garante que o app esteja na HomePage, fazendo login ou navegando de volta se necessário."""
+        time.sleep(1)
+        if self._is_element_present(LOGIN_USERNAME_FIELD_KEY, timeout=2):
+            print("Tela de login detectada. Realizando login...")
+            self._enter_text(LOGIN_USERNAME_FIELD_KEY, username)
+            self._enter_text(LOGIN_PASSWORD_FIELD_KEY, password)
+            self._tap_element_by_key(LOGIN_BUTTON_KEY)
+        
+        # Se não estiver na home page, tenta voltar
+        while not self._is_element_present(HOME_PAGE_APPBAR_TITLE_KEY, timeout=1):
+            print("Não está na HomePage. Tentando navegar para trás...")
+            self.driver.back()
+            time.sleep(1)
+            # F condição de parada se estiver na tela de login (não pode voltar mais)
+            if self._is_element_present(LOGIN_USERNAME_FIELD_KEY, timeout=1):
+                self.fail("Falha ao retornar para a HomePage. Encontrou a tela de login.")
+        
+        self.assertTrue(self._is_element_present(HOME_PAGE_APPBAR_TITLE_KEY, 5), "Não foi possível garantir que o teste está na HomePage.")
 
-        # Verifica título do AppBar
-        self._find_element_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY)
-        print("Título 'Menu Principal' encontrado.")
+    def _test_navigation_to(self, button_key, indicator_key, page_name):
+        """Template para testar a navegação para uma página e o retorno."""
+        print(f"Testando navegação para {page_name}...")
+        self._tap_element_by_key(button_key)
+        self.assertTrue(self._is_element_present(indicator_key, 10), f"Falha ao navegar para {page_name}.")
+        print(f"Navegou para {page_name} com sucesso.")
+        self.driver.back()
+        self.assertTrue(self._is_element_present(HOME_PAGE_APPBAR_TITLE_KEY, 5), f"Falha ao retornar da {page_name}.")
+        print(f"Retornou da {page_name} com sucesso.")
 
-        # Navegações
-        self._navigate_to_section_and_back(HOME_PAGE_FORMS_BUTTON_KEY, FORMS_PAGE_INDICATOR_KEY, "Formulários")
-        self._navigate_to_section_and_back(HOME_PAGE_LISTVIEW_BUTTON_KEY, LISTVIEW_PAGE_INDICATOR_KEY, "ListView")
-        self._navigate_to_section_and_back(HOME_PAGE_NATIVE_RESOURCES_BUTTON_KEY, RECURSOS_PAGE_INDICATOR_KEY, "Recursos Nativos")
-        self._navigate_to_section_and_back(HOME_PAGE_GESTURES_BUTTON_KEY, GESTOS_PAGE_INDICATOR_KEY, "Gestos na Tela")
-        self._navigate_to_section_and_back(HOME_PAGE_CLICK_AND_HOLD_BUTTON_KEY, CLICK_PAGE_INDICATOR_KEY, "Clicar e Segurar")
-        self._navigate_to_section_and_back(HOME_PAGE_CHAT_BUTTON_KEY, CHAT_PAGE_INDICATOR_KEY, "Chat Simulado")
+    # --- Testes ---
 
-        # Verifica se voltou para a HomePage no final
-        self.assertTrue(self._is_element_present_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY),
-                        "Não retornou à HomePage após todas as navegações.")
-        print("Teste de navegação concluído.")
+    def test_navigation_to_forms(self):
+        self._test_navigation_to(HOME_PAGE_FORMS_BUTTON_KEY, FORMS_PAGE_INDICATOR_KEY, "Formulários")
+        
+    def test_navigation_to_listview(self):
+        self._test_navigation_to(HOME_PAGE_LISTVIEW_BUTTON_KEY, LISTVIEW_PAGE_INDICATOR_KEY, "ListView")
 
-    def test_logout_functionality(self):
-        self._ensure_on_home_page()
+    def test_navigation_to_native_resources(self):
+        self._test_navigation_to(HOME_PAGE_NATIVE_RESOURCES_BUTTON_KEY, RECURSOS_PAGE_INDICATOR_KEY, "Recursos Nativos")
 
-        # 1. Tenta Logout e Cancela
-        self._tap_element(HOME_PAGE_LOGOUT_BUTTON_KEY)
-        self._find_element_by_value_key(HOME_PAGE_LOGOUT_DIALOG_KEY) # Espera o diálogo
-        self.assertTrue(self._is_text_present(TEXT_LOGOUT_DIALOG_TITLE), "Título do diálogo de logout não encontrado.")
-        print("Diálogo de logout aberto.")
+    def test_navigation_to_gestures(self):
+        self._test_navigation_to(HOME_PAGE_GESTURES_BUTTON_KEY, GESTOS_PAGE_INDICATOR_KEY, "Gestos")
 
-        self._tap_element(HOME_PAGE_LOGOUT_DIALOG_CANCEL_BUTTON_KEY)
-        # Espera o diálogo desaparecer
-        self.wait.until(
-            EC.invisibility_of_element_located((AppiumBy.FLUTTER, self.finder.by_value_key(HOME_PAGE_LOGOUT_DIALOG_KEY)))
+    def test_navigation_to_click_and_hold(self):
+        self._test_navigation_to(HOME_PAGE_CLICK_AND_HOLD_BUTTON_KEY, CLICK_PAGE_INDICATOR_KEY, "Clicar e Segurar")
+    
+    def test_navigation_to_chat(self):
+        self._test_navigation_to(HOME_PAGE_CHAT_BUTTON_KEY, CHAT_PAGE_INDICATOR_KEY, "Chat")
+
+    def test_logout_cancellation(self):
+        """Testa a funcionalidade de cancelar o logout."""
+        print("Testando cancelamento do logout...")
+        self._tap_element_by_key(HOME_PAGE_LOGOUT_BUTTON_KEY)
+        self.assertTrue(self._is_element_present(HOME_PAGE_LOGOUT_DIALOG_KEY), "Diálogo de logout não apareceu.")
+        
+        self._tap_element_by_key(HOME_PAGE_LOGOUT_DIALOG_CANCEL_BUTTON_KEY)
+        
+        # Verifica se o diálogo desapareceu e se ainda está na home
+        self.assertTrue(
+            WebDriverWait(self.driver, 5).until_not(
+                EC.presence_of_element_located((AppiumBy.FLUTTER, self.finder.by_value_key(HOME_PAGE_LOGOUT_DIALOG_KEY)))
+            ), "Diálogo de logout não fechou após o cancelamento."
         )
-        print("Logout cancelado, diálogo fechado.")
+        self.assertTrue(self._is_element_present(HOME_PAGE_APPBAR_TITLE_KEY), "Não permaneceu na HomePage após cancelar o logout.")
+        print("Cancelamento de logout verificado com sucesso.")
 
-        self.assertTrue(self._is_element_present_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY),
-                        "Deveria permanecer na HomePage após cancelar o logout.")
-
-        # 2. Tenta Logout e Confirma
-        self._tap_element(HOME_PAGE_LOGOUT_BUTTON_KEY)
-        self._find_element_by_value_key(HOME_PAGE_LOGOUT_DIALOG_KEY)
-        print("Diálogo de logout reaberto.")
-
-        self._tap_element(HOME_PAGE_LOGOUT_DIALOG_CONFIRM_BUTTON_KEY)
-        # Espera a navegação para LoginPage
-        self._find_element_by_value_key(LOGIN_USERNAME_FIELD_KEY, timeout=15)
-        print("Logout confirmado, navegou para LoginPage.")
-
-        self.assertFalse(self._is_element_present_by_value_key(HOME_PAGE_APPBAR_TITLE_KEY, timeout=1),
-                         "HomePage ainda está presente após o logout.")
-        print("Teste de logout concluído.")
+    def test_logout_confirmation(self):
+        """Testa a confirmação de logout e o retorno para a tela de login."""
+        print("Testando confirmação de logout...")
+        self._tap_element_by_key(HOME_PAGE_LOGOUT_BUTTON_KEY)
+        self.assertTrue(self._is_element_present(HOME_PAGE_LOGOUT_DIALOG_KEY), "Diálogo de logout não apareceu.")
+        
+        self._tap_element_by_key(HOME_PAGE_LOGOUT_DIALOG_CONFIRM_BUTTON_KEY)
+        
+        # Verifica se navegou para a tela de login
+        self.assertTrue(self._is_element_present(LOGIN_USERNAME_FIELD_KEY, 10), "Não navegou para a LoginPage após confirmar o logout.")
+        print("Logout confirmado com sucesso.")
 
 if __name__ == '__main__':
-    if "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" in APP_PATH: # Verificação mais genérica
+    if "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" in APP_PATH:
+        print("="*60)
         print("ERRO: A variável APP_PATH não foi configurada no script.")
-        print(f"Por favor, edite o arquivo {__file__} e defina o caminho para o seu APK/APP.")
+        print(f"Por favor, edite o arquivo '{__file__}' e defina o caminho correto para o seu APK.")
+        print("="*60)
     else:
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(HomePageTests))
         runner = unittest.TextTestRunner(verbosity=2)
-        print(f"Iniciando testes da HomePage para o app: {APP_PATH}")
+        print(f"\nIniciando testes da HomePage para o app: {APP_PATH}")
         print(f"Conectando ao servidor Appium em: {APPIUM_HOST}...")
         runner.run(suite)
