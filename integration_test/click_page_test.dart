@@ -1,137 +1,122 @@
-import 'package:appium_and_flutter_test/pages/home_page.dart';
-import 'package:appium_and_flutter_test/pages/login_page.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
+// test/integration/click_page_test.dart
 import 'package:appium_and_flutter_test/main.dart' as app;
 import 'package:appium_and_flutter_test/pages/click_page.dart';
+import 'package:appium_and_flutter_test/pages/home_page.dart';
+import 'package:appium_and_flutter_test/pages/login_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+
+// --- Constantes para os Testes ---
+const String kCorrectUsername = 'admin';
+const String kCorrectPassword = '1234';
+
+// Mensagens de Alerta
+const String kDoubleTapAlertTitle = 'Duplo Clique!';
+const String kDoubleTapAlertContent = 'Você clicou duas vezes neste card.';
+const String kLongPressAlertTitle = 'Clique Longo!';
+const String kLongPressAlertContent = 'Você pressionou e segurou este card.';
+
+// --- Funções Auxiliares de Teste ---
+
+/// Garante um estado limpo, inicializando o app e navegando até a [ClickPage].
+Future<void> _initializeAppAndNavigateToClick(WidgetTester tester) async {
+  app.main();
+  await tester.pumpAndSettle();
+
+  if (tester.any(find.byType(LoginPage))) {
+    await tester.enterText(
+      find.byKey(LoginPage.usernameFieldKey),
+      kCorrectUsername,
+    );
+    await tester.enterText(
+      find.byKey(LoginPage.passwordFieldKey),
+      kCorrectPassword,
+    );
+    await tester.tap(find.byKey(LoginPage.loginButtonKey));
+    await tester.pumpAndSettle();
+  }
+
+  expect(find.byType(HomePage), findsOneWidget);
+  await tester.tap(find.byKey(HomePage.clickAndHoldButtonKey));
+  await tester.pumpAndSettle();
+  expect(find.byType(ClickPage), findsOneWidget);
+}
+
+/// Testa um gesto em um card, verifica o alerta resultante e o fecha.
+Future<void> _testGestureAndAlert(
+  WidgetTester tester, {
+  required Future<void> Function(Finder) gesture,
+  required Key cardKey,
+  required String alertTitle,
+  required String alertContent,
+}) async {
+  // Act: Executa o gesto no card.
+  final cardFinder = find.byKey(cardKey);
+  expect(cardFinder, findsOneWidget);
+  await gesture(cardFinder);
+  await tester.pumpAndSettle();
+
+  // Assert: Verifica se o diálogo de alerta é exibido corretamente.
+  expect(find.byKey(ClickPage.alertDialogKey), findsOneWidget);
+  expect(find.text(alertTitle), findsOneWidget);
+  expect(find.text(alertContent), findsOneWidget);
+
+  // Act: Fecha o diálogo.
+  await tester.tap(find.byKey(ClickPage.alertDialogOkButtonKey));
+  await tester.pumpAndSettle();
+
+  // Assert: Verifica se o diálogo desapareceu.
+  expect(find.byKey(ClickPage.alertDialogKey), findsNothing);
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> navigateToClickPage(WidgetTester tester) async {
-    app.main(); // Inicia o app
-    // Aguarda um tempo para o app estabilizar na tela inicial (LoginPage ou HomePage)
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-
-    // Se estiver na LoginPage, realiza o login
-    if (tester.any(find.byType(LoginPage))) {
-      await tester.enterText(
-        find.byKey(LoginPage.usernameFieldKey),
-        'admin',
-      ); // Use um usuário válido
-      await tester.enterText(
-        find.byKey(LoginPage.passwordFieldKey),
-        '1234',
-      ); // Use uma senha válida
-      await tester.tap(find.byKey(LoginPage.loginButtonKey));
-      // Aguarda o login, navegação para HomePage e desaparecimento do SnackBar
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-    }
-
-    // Garante que está na HomePage
-    expect(
-      find.byType(HomePage),
-      findsOneWidget,
-      reason: "Não foi possível alcançar a HomePage.",
-    );
-
-    // Navega para ClickPage
-    await tester.tap(find.byKey(HomePage.clickAndHoldButtonKey));
-    await tester.pumpAndSettle(); // Aguarda a navegação
-  }
-
   group('Testes de Integração da ClickPage', () {
-    testWidgets('Interage com double tap e long press cards exibindo alertas', (
+    // Garante que cada teste comece em um estado limpo.
+    setUp(() async {
+      // A inicialização será feita dentro de cada teste para garantir isolamento total.
+    });
+
+    testWidgets('Deve exibir um alerta ao realizar um duplo clique no card', (
       WidgetTester tester,
     ) async {
-      await navigateToClickPage(tester);
+      // Arrange
+      await _initializeAppAndNavigateToClick(tester);
 
-      // Garante que está na ClickPage
-      expect(
-        find.byType(ClickPage),
-        findsOneWidget,
-        reason: "ClickPage não foi carregada.",
+      // Act & Assert
+      await _testGestureAndAlert(
+        tester,
+        // O método `tester.doubleTap(finder)` pode não estar disponível em algumas
+        // versões. Esta abordagem manual com dois `tap` e um atraso
+        // (`pump`) é uma alternativa mais explícita e robusta.
+        gesture: (finder) async {
+          await tester.tap(finder);
+          // É necessário um pequeno atraso entre os toques para ser
+          // reconhecido como um duplo clique.
+          await tester.pump(const Duration(milliseconds: 100));
+          await tester.tap(finder);
+        },
+        cardKey: ClickPage.doubleTapCardKey,
+        alertTitle: kDoubleTapAlertTitle,
+        alertContent: kDoubleTapAlertContent,
       );
+    });
 
-      // --- Teste do Card de Duplo Clique ---
-      final doubleTapCardFinder = find.byKey(ClickPage.doubleTapCardKey);
-      expect(
-        doubleTapCardFinder,
-        findsOneWidget,
-        reason: "Card de duplo clique não encontrado",
-      );
+    testWidgets('Deve exibir um alerta ao realizar um clique longo no card', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      await _initializeAppAndNavigateToClick(tester);
 
-      // Realiza o duplo clique
-      await tester.tap(doubleTapCardFinder);
-      await tester.tap(doubleTapCardFinder);
-      await tester.pumpAndSettle(); // Aguarda o diálogo aparecer
-
-      // Verifica se o AlertDialog de duplo clique apareceu
-      expect(
-        find.byKey(ClickPage.alertDialogKey),
-        findsOneWidget,
-        reason: "AlertDialog de duplo clique não apareceu",
-      );
-      expect(
-        find.text('Duplo Clique!'),
-        findsOneWidget,
-        reason: "Título do alerta de duplo clique incorreto",
-      );
-      expect(
-        find.text('Você clicou duas vezes neste card.'),
-        findsOneWidget,
-        reason: "Conteúdo do alerta de duplo clique incorreto",
-      );
-
-      // Fecha o AlertDialog
-      await tester.tap(find.byKey(ClickPage.alertDialogOkButtonKey));
-      await tester.pumpAndSettle(); // Aguarda o diálogo desaparecer
-
-      // Verifica se o AlertDialog desapareceu
-      expect(
-        find.byKey(ClickPage.alertDialogKey),
-        findsNothing,
-        reason: "AlertDialog de duplo clique não desapareceu",
-      );
-
-      // --- Teste do Card de Clique Longo ---
-      final longPressCardFinder = find.byKey(ClickPage.longPressCardKey);
-      expect(
-        longPressCardFinder,
-        findsOneWidget,
-        reason: "Card de clique longo não encontrado",
-      );
-
-      // Realiza o clique longo
-      await tester.longPress(longPressCardFinder);
-      await tester.pumpAndSettle(); // Aguarda o diálogo aparecer
-
-      // Verifica se o AlertDialog de clique longo apareceu
-      expect(
-        find.byKey(ClickPage.alertDialogKey),
-        findsOneWidget,
-        reason: "AlertDialog de clique longo não apareceu",
-      );
-      expect(
-        find.text('Clique Longo!'),
-        findsOneWidget,
-        reason: "Título do alerta de clique longo incorreto",
-      );
-      expect(
-        find.text('Você pressionou e segurou este card.'),
-        findsOneWidget,
-        reason: "Conteúdo do alerta de clique longo incorreto",
-      );
-
-      // Fecha o AlertDialog
-      await tester.tap(find.byKey(ClickPage.alertDialogOkButtonKey));
-      await tester.pumpAndSettle(); // Aguarda o diálogo desaparecer
-
-      // Verifica se o AlertDialog desapareceu
-      expect(
-        find.byKey(ClickPage.alertDialogKey),
-        findsNothing,
-        reason: "AlertDialog de clique longo não desapareceu",
+      // Act & Assert
+      await _testGestureAndAlert(
+        tester,
+        gesture: (finder) => tester.longPress(finder),
+        cardKey: ClickPage.longPressCardKey,
+        alertTitle: kLongPressAlertTitle,
+        alertContent: kLongPressAlertContent,
       );
     });
   });

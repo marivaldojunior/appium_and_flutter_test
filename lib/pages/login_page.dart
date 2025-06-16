@@ -17,7 +17,8 @@ class LoginPage extends StatefulWidget {
   static const Key alertDialogErrorOkButtonKey = ValueKey(
     'login_alert_error_ok_button',
   );
-
+  static const Key loginSnackbarSuccess = ValueKey('login_snackbar_success');
+  static const Key loginAlertError = ValueKey('login_alert_error');
   // --- Fim das Keys para Testes ---
 
   @override
@@ -37,8 +38,8 @@ class LoginPageState extends State<LoginPage> {
       if (_usernameController.text == _defaultUsername &&
           _passwordController.text == _defaultPassword) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            key: ValueKey('login_snackbar_success'), // Key para o SnackBar
+          SnackBar(
+            key: LoginPage.loginSnackbarSuccess, // Key para o SnackBar
             content: Text(
               'Login bem-sucedido!',
               style: TextStyle(color: Colors.white),
@@ -55,9 +56,7 @@ class LoginPageState extends State<LoginPage> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              key: const ValueKey(
-                'login_alert_error',
-              ), // Key para o AlertDialog
+              key: LoginPage.loginAlertError, // Key para o AlertDialog
               title: const Text('Erro de Login'),
               content: const Text('Usuário ou senha incorretos.'),
               actions: <Widget>[

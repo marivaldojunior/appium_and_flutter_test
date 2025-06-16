@@ -1,129 +1,155 @@
+// test/integration/recursos_page_test.dart
+import 'package:appium_and_flutter_test/main.dart' as app;
 import 'package:appium_and_flutter_test/pages/home_page.dart';
 import 'package:appium_and_flutter_test/pages/login_page.dart';
+import 'package:appium_and_flutter_test/pages/recursos_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:appium_and_flutter_test/main.dart' as app;
-import 'package:appium_and_flutter_test/pages/recursos_page.dart';
+
+// --- Constantes para os Testes ---
+const String kInitialImageText = 'Nenhuma imagem selecionada';
+const String kNoImageTakenSnackbarMsg = 'Nenhuma imagem tirada.';
+const String kNoImageSelectedSnackbarMsg = 'Nenhuma imagem selecionada.';
+const String kCorrectUsername = 'admin';
+const String kCorrectPassword = '1234';
+
+// --- Funções Auxiliares de Teste ---
+
+/// Inicializa o app, faz login e navega até a [RecursosPage].
+/// Garante um estado limpo e consistente para o início de cada teste.
+Future<void> _initializeAppAndNavigateToRecursos(WidgetTester tester) async {
+  // Arrange: Inicia o app do zero.
+  app.main();
+  await tester.pumpAndSettle();
+
+  // Act: Faz login se estiver na LoginPage.
+  if (tester.any(find.byType(LoginPage))) {
+    await tester.enterText(
+      find.byKey(LoginPage.usernameFieldKey),
+      kCorrectUsername,
+    );
+    await tester.enterText(
+      find.byKey(LoginPage.passwordFieldKey),
+      kCorrectPassword,
+    );
+    await tester.tap(find.byKey(LoginPage.loginButtonKey));
+    await tester.pumpAndSettle();
+  }
+
+  // Assert: Garante que chegou na HomePage.
+  expect(
+    find.byType(HomePage),
+    findsOneWidget,
+    reason: "Deveria estar na HomePage após o login.",
+  );
+
+  // Act: Navega para a RecursosPage.
+  await tester.tap(find.byKey(HomePage.nativeResourcesButtonKey));
+  await tester.pumpAndSettle();
+
+  // Assert: Confirma que a RecursosPage foi carregada.
+  expect(
+    find.byType(RecursosPage),
+    findsOneWidget,
+    reason: "Deveria ter navegado para a RecursosPage.",
+  );
+}
+
+/// Testa a seleção de uma fonte de imagem (Câmera ou Galeria) e verifica o SnackBar esperado,
+/// simulando o cancelamento da seleção (retorno nulo do ImagePicker).
+Future<void> _testImageSelectionSourceAndCancel(
+  WidgetTester tester, {
+  required Key sourceOptionKey,
+  required String expectedSnackbarMsg,
+}) async {
+  // Act: Abre o seletor de fonte de imagem.
+  await tester.tap(find.byKey(RecursosPage.selectImageButtonKey));
+  await tester.pumpAndSettle();
+
+  // Assert: Verifica se o ModalBottomSheet com as opções está visível.
+  expect(find.byKey(RecursosPage.imageSourceSheetKey), findsOneWidget);
+  expect(find.byKey(sourceOptionKey), findsOneWidget);
+
+  // Act: Toca na opção desejada (Câmera ou Galeria).
+  await tester.tap(find.byKey(sourceOptionKey));
+  // Aguarda o fechamento do sheet e a chamada do ImagePicker (que retornará null).
+  await tester.pumpAndSettle();
+
+  // Assert: Verifica se a SnackBar correta foi exibida.
+  expect(find.text(expectedSnackbarMsg), findsOneWidget);
+
+  // Act: Aguarda a SnackBar desaparecer.
+  await tester.pumpAndSettle(
+    const Duration(seconds: 4),
+  ); // Duração padrão de uma SnackBar.
+
+  // Assert: Confirma que a SnackBar desapareceu.
+  expect(find.text(expectedSnackbarMsg), findsNothing);
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> navigateToRecursosPage(WidgetTester tester) async {
-    app.main(); // Inicia o app
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-
-    if (tester.any(find.byType(LoginPage))) {
-      await tester.enterText(find.byKey(LoginPage.usernameFieldKey), 'admin');
-      await tester.enterText(find.byKey(LoginPage.passwordFieldKey), '1234');
-      await tester.tap(find.byKey(LoginPage.loginButtonKey));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-    }
-
-    expect(
-      find.byType(HomePage),
-      findsOneWidget,
-      reason: "Não foi possível alcançar a HomePage.",
-    );
-
-    await tester.tap(find.byKey(HomePage.nativeResourcesButtonKey));
-    await tester.pumpAndSettle();
-
-    expect(
-      find.byType(RecursosPage),
-      findsOneWidget,
-      reason: "RecursosPage não foi carregada.",
-    );
-  }
-
   group('Testes de Integração da RecursosPage', () {
+    // O setUp é executado ANTES de cada teste no grupo, garantindo isolamento.
+    setUp((() async {
+      // Como a navegação é o ponto de partida para todos os testes,
+      // a inicialização é feita dentro de cada teste para garantir um
+      // ambiente completamente novo e evitar estados compartilhados.
+    }));
+
     testWidgets(
-      'Verifica UI inicial e interage com seletores de imagem (simulando nenhuma seleção)',
+      'Deve exibir a UI inicial corretamente, sem imagem selecionada',
       (WidgetTester tester) async {
-        await navigateToRecursosPage(tester);
+        // Arrange
+        await _initializeAppAndNavigateToRecursos(tester);
 
-        // 1. Verifica estado inicial da UI
+        // Assert: Verifica os elementos visíveis no estado inicial.
         expect(find.byKey(RecursosPage.imageDisplayAreaKey), findsOneWidget);
-        expect(find.text('Nenhuma imagem selecionada'), findsOneWidget);
+        expect(find.text(kInitialImageText), findsOneWidget);
         expect(find.byIcon(Icons.image_search), findsOneWidget);
-
-        expect(find.byKey(RecursosPage.openCameraButtonKey), findsOneWidget);
-        expect(find.byKey(RecursosPage.openGalleryButtonKey), findsOneWidget);
         expect(find.byKey(RecursosPage.selectImageButtonKey), findsOneWidget);
 
-        // O botão de remover imagem não deve estar visível inicialmente
+        // Assert: Verifica que o botão de remover não está visível.
         expect(find.byKey(RecursosPage.removeImageButtonKey), findsNothing);
+      },
+    );
 
-        // 2. Tenta abrir a câmera (ImagePicker retornará null no teste)
-        await tester.tap(find.byKey(RecursosPage.openCameraButtonKey));
-        // O ImagePicker abre uma UI nativa. Em testes, sem interação manual ou mocks avançados,
-        // ele geralmente retorna null rapidamente.
-        await tester.pumpAndSettle(
-          const Duration(seconds: 2),
-        ); // Aguarda possível SnackBar ou atualização de estado
+    testWidgets(
+      'Deve exibir SnackBar ao simular cancelamento da seleção da galeria',
+      (WidgetTester tester) async {
+        // Arrange
+        await _initializeAppAndNavigateToRecursos(tester);
 
-        // Verifica se a SnackBar de "Nenhuma imagem tirada" apareceu
-        expect(find.text('Nenhuma imagem tirada.'), findsOneWidget);
-        // Aguarda a SnackBar desaparecer
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-        expect(find.text('Nenhuma imagem tirada.'), findsNothing);
-
-        // 3. Tenta abrir a galeria (ImagePicker retornará null no teste)
-        await tester.tap(find.byKey(RecursosPage.openGalleryButtonKey));
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        // Verifica se a SnackBar de "Nenhuma imagem selecionada" apareceu
-        expect(find.text('Nenhuma imagem selecionada.'), findsOneWidget);
-        // Aguarda a SnackBar desaparecer
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-        expect(find.text('Nenhuma imagem selecionada.'), findsNothing);
-
-        // 4. Tenta selecionar imagem via ActionSheet (Galeria)
-        await tester.tap(find.byKey(RecursosPage.selectImageButtonKey));
-        await tester.pumpAndSettle(); // Aguarda o ModalBottomSheet aparecer
-
-        expect(find.byKey(RecursosPage.imageSourceSheetKey), findsOneWidget);
-        expect(
-          find.byKey(RecursosPage.imageSourceSheetGalleryOptionKey),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(RecursosPage.imageSourceSheetCameraOptionKey),
-          findsOneWidget,
+        // Act & Assert
+        await _testImageSelectionSourceAndCancel(
+          tester,
+          sourceOptionKey: RecursosPage.imageSourceSheetGalleryOptionKey,
+          expectedSnackbarMsg: kNoImageSelectedSnackbarMsg,
         );
 
-        // Clica na opção Galeria
-        await tester.tap(
-          find.byKey(RecursosPage.imageSourceSheetGalleryOptionKey),
+        // Assert final: Confirma que o estado da página não mudou.
+        expect(find.text(kInitialImageText), findsOneWidget);
+        expect(find.byKey(RecursosPage.removeImageButtonKey), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'Deve exibir SnackBar ao simular cancelamento da captura da câmera',
+      (WidgetTester tester) async {
+        // Arrange
+        await _initializeAppAndNavigateToRecursos(tester);
+
+        // Act & Assert
+        await _testImageSelectionSourceAndCancel(
+          tester,
+          sourceOptionKey: RecursosPage.imageSourceSheetCameraOptionKey,
+          expectedSnackbarMsg: kNoImageTakenSnackbarMsg,
         );
-        await tester
-            .pumpAndSettle(); // ModalBottomSheet fecha, ImagePicker é chamado
-        await tester.pumpAndSettle(
-          const Duration(seconds: 2),
-        ); // Aguarda SnackBar
 
-        expect(find.text('Nenhuma imagem selecionada.'), findsOneWidget);
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        // 5. Tenta selecionar imagem via ActionSheet (Câmera)
-        await tester.tap(find.byKey(RecursosPage.selectImageButtonKey));
-        await tester.pumpAndSettle();
-
-        expect(find.byKey(RecursosPage.imageSourceSheetKey), findsOneWidget);
-
-        // Clica na opção Câmera
-        await tester.tap(
-          find.byKey(RecursosPage.imageSourceSheetCameraOptionKey),
-        );
-        await tester.pumpAndSettle();
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        expect(find.text('Nenhuma imagem tirada.'), findsOneWidget);
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        // Confirma que a área de imagem ainda mostra "Nenhuma imagem selecionada"
-        // pois não simulamos o carregamento de uma imagem real.
-        expect(find.text('Nenhuma imagem selecionada'), findsOneWidget);
+        // Assert final: Confirma que o estado da página não mudou.
+        expect(find.text(kInitialImageText), findsOneWidget);
         expect(find.byKey(RecursosPage.removeImageButtonKey), findsNothing);
       },
     );

@@ -1,134 +1,164 @@
+// test/integration/login_page_test.dart
+import 'package:appium_and_flutter_test/main.dart' as app;
 import 'package:appium_and_flutter_test/pages/home_page.dart';
-import 'package:flutter/material.dart';
+import 'package:appium_and_flutter_test/pages/login_page.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:appium_and_flutter_test/main.dart' as app;
-import 'package:appium_and_flutter_test/pages/login_page.dart';
+
+// --- Constantes para os Testes ---
+// Credenciais
+const String kCorrectUsername = 'admin';
+const String kCorrectPassword = '1234';
+const String kWrongUsername = 'usuarioerrado';
+const String kWrongPassword = 'senhaerrada';
+
+// Mensagens de Validação e UI
+const String kEmptyUserValidationMsg = 'Por favor, insira o usuário';
+const String kEmptyPasswordValidationMsg = 'Por favor, insira a senha';
+const String kLoginErrorDialogTitle = 'Erro de Login';
+const String kLoginErrorDialogContent = 'Usuário ou senha incorretos.';
+const String kLoginSuccessSnackbarMsg = 'Login bem-sucedido!';
+const String kForgotPasswordSnackbarMsg =
+    'Funcionalidade "Esqueceu a senha?" não implementada.';
+
+// Função auxiliar para inicializar o app de forma limpa para cada teste.
+Future<void> _initializeApp(WidgetTester tester) async {
+  app.main();
+  await tester.pumpAndSettle();
+}
+
+// Função auxiliar para encapsular a ação de login.
+Future<void> _performLogin(
+  WidgetTester tester, {
+  String? username,
+  String? password,
+}) async {
+  if (username != null) {
+    await tester.enterText(find.byKey(LoginPage.usernameFieldKey), username);
+  }
+  if (password != null) {
+    await tester.enterText(find.byKey(LoginPage.passwordFieldKey), password);
+  }
+  await tester.tap(find.byKey(LoginPage.loginButtonKey));
+  // Aguarda por todas as animações e microtarefas (diálogos, snackbars, navegação).
+  await tester.pumpAndSettle();
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Testes de Integração da LoginPage', () {
-    testWidgets('Verifica UI inicial e validações de campos vazios', (
+  group('Testes de Integração da Página de Login', () {
+    testWidgets(
+      'Deve exibir elementos da UI e mensagens de erro para campos vazios',
+      (WidgetTester tester) async {
+        // Arrange: Inicia o app.
+        await _initializeApp(tester);
+
+        // Assert: Verifica se os elementos iniciais da UI estão presentes.
+        expect(find.byKey(LoginPage.usernameFieldKey), findsOneWidget);
+        expect(find.byKey(LoginPage.passwordFieldKey), findsOneWidget);
+        expect(find.byKey(LoginPage.loginButtonKey), findsOneWidget);
+        expect(find.byKey(LoginPage.forgotPasswordButtonKey), findsOneWidget);
+        expect(
+          find.text('Login'),
+          findsOneWidget,
+          reason: 'O título do AppBar deve estar visível',
+        );
+
+        // Act: Toca no botão de login com os campos vazios.
+        await tester.tap(find.byKey(LoginPage.loginButtonKey));
+        await tester.pumpAndSettle();
+
+        // Assert: Verifica as mensagens de validação.
+        expect(find.text(kEmptyUserValidationMsg), findsOneWidget);
+        expect(find.text(kEmptyPasswordValidationMsg), findsOneWidget);
+      },
+    );
+
+    testWidgets('Deve exibir diálogo de erro ao usar credenciais incorretas', (
       WidgetTester tester,
     ) async {
-      // Garante que o app seja reiniciado para cada teste, começando na LoginPage
-      app.main();
-      await tester.pumpAndSettle();
-      // Verifica se a LoginPage está sendo exibida
-      expect(find.byType(LoginPage), findsOneWidget);
+      // Arrange
+      await _initializeApp(tester);
 
-      // Verifica elementos da UI
-      expect(find.byKey(LoginPage.usernameFieldKey), findsOneWidget);
-      expect(find.byKey(LoginPage.passwordFieldKey), findsOneWidget);
-      expect(find.byKey(LoginPage.loginButtonKey), findsOneWidget);
-      expect(find.byKey(LoginPage.forgotPasswordButtonKey), findsOneWidget);
-      expect(find.text('Login'), findsOneWidget); // Título do AppBar
-
-      // Tenta logar com campos vazios
-      await tester.tap(find.byKey(LoginPage.loginButtonKey));
-      await tester
-          .pumpAndSettle(); // Aguarda a reconstrução da UI com as mensagens de erro
-
-      // Verifica mensagens de validação
-      expect(find.text('Por favor, insira o usuário'), findsOneWidget);
-      expect(find.text('Por favor, insira a senha'), findsOneWidget);
-    });
-
-    testWidgets('Login com credenciais incorretas exibe diálogo de erro', (
-      WidgetTester tester,
-    ) async {
-      // Garante que o app seja reiniciado para cada teste, começando na LoginPage
-      app.main();
-      await tester.pumpAndSettle();
-      await tester.enterText(
-        find.byKey(LoginPage.usernameFieldKey),
-        'usuarioerrado',
+      // Act
+      await _performLogin(
+        tester,
+        username: kWrongUsername,
+        password: kWrongPassword,
       );
-      await tester.enterText(
-        find.byKey(LoginPage.passwordFieldKey),
-        'senhaerrada',
-      );
-      await tester.tap(find.byKey(LoginPage.loginButtonKey));
-      await tester.pumpAndSettle(); // Aguarda o diálogo aparecer
 
-      // Verifica o diálogo de erro
-      expect(find.byKey(const ValueKey('login_alert_error')), findsOneWidget);
-      expect(find.text('Erro de Login'), findsOneWidget);
-      expect(find.text('Usuário ou senha incorretos.'), findsOneWidget);
+      // Assert: Verifica se o diálogo de erro é exibido.
+      expect(find.byKey(LoginPage.loginAlertError), findsOneWidget);
+      expect(find.text(kLoginErrorDialogTitle), findsOneWidget);
+      expect(find.text(kLoginErrorDialogContent), findsOneWidget);
 
-      // Fecha o diálogo
+      // Act: Fecha o diálogo.
       await tester.tap(find.byKey(LoginPage.alertDialogErrorOkButtonKey));
-      await tester.pumpAndSettle(); // Aguarda o diálogo desaparecer
+      await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('login_alert_error')), findsNothing);
-      // Garante que ainda está na LoginPage
+      // Assert: Verifica se o diálogo desapareceu e se o app continua na página de login.
+      expect(find.byKey(LoginPage.loginAlertError), findsNothing);
       expect(find.byType(LoginPage), findsOneWidget);
     });
 
     testWidgets(
-      'Login com credenciais corretas navega para HomePage e exibe SnackBar',
+      'Deve exibir SnackBar e navegar para a HomePage com credenciais corretas',
       (WidgetTester tester) async {
-        // Garante que o app seja reiniciado para cada teste, começando na LoginPage
-        app.main();
-        await tester.pumpAndSettle();
-        // Usa as credenciais padrão definidas na LoginPageState
-        // Se forem diferentes, ajuste aqui.
-        const String defaultUsername = 'admin';
-        const String defaultPassword = '1234';
+        // Arrange
+        await _initializeApp(tester);
 
-        await tester.enterText(
-          find.byKey(LoginPage.usernameFieldKey),
-          defaultUsername,
+        // Act
+        await _performLogin(
+          tester,
+          username: kCorrectUsername,
+          password: kCorrectPassword,
         );
-        await tester.enterText(
-          find.byKey(LoginPage.passwordFieldKey),
-          defaultPassword,
-        );
-        await tester.tap(find.byKey(LoginPage.loginButtonKey));
-        await tester.pumpAndSettle(); // Aguarda SnackBar e possível navegação
 
-        // Verifica SnackBar de sucesso
+        // Assert: Verifica se a SnackBar de sucesso é exibida.
+        expect(find.byKey(LoginPage.loginSnackbarSuccess), findsOneWidget);
+        expect(find.text(kLoginSuccessSnackbarMsg), findsOneWidget);
+
+        // Assert: Verifica a navegação para a HomePage.
         expect(
-          find.byKey(const ValueKey('login_snackbar_success')),
+          find.byType(HomePage),
           findsOneWidget,
+          reason: "Deveria navegar para a HomePage",
         );
-        expect(find.text('Login bem-sucedido!'), findsOneWidget);
-
-        // Aguarda um pouco mais para a navegação e o SnackBar desaparecer (se configurado para tal)
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-
-        // Verifica se navegou para HomePage
-        expect(find.byType(HomePage), findsOneWidget);
-        expect(find.byType(LoginPage), findsNothing);
+        expect(
+          find.byType(LoginPage),
+          findsNothing,
+          reason: "A LoginPage não deveria mais estar visível",
+        );
       },
     );
 
-    testWidgets('Botão "Esqueceu a senha?" exibe SnackBar informativo', (
-      WidgetTester tester,
-    ) async {
-      // Garante que o app seja reiniciado para cada teste, começando na LoginPage
-      app.main();
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(LoginPage.forgotPasswordButtonKey));
-      await tester.pumpAndSettle(); // Aguarda o SnackBar aparecer
+    testWidgets(
+      'Deve exibir SnackBar informativo ao clicar em "Esqueceu a senha?"',
+      (WidgetTester tester) async {
+        // Arrange
+        await _initializeApp(tester);
 
-      // Verifica o SnackBar
-      expect(
-        find.byKey(const ValueKey('login_snackbar_forgot_password_info')),
-        findsOneWidget,
-      );
-      expect(
-        find.text('Funcionalidade "Esqueceu a senha?" não implementada.'),
-        findsOneWidget,
-      );
+        // Act
+        await tester.tap(find.byKey(LoginPage.forgotPasswordButtonKey));
+        await tester.pumpAndSettle();
 
-      // Aguarda o SnackBar desaparecer (se configurado para tal)
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-      expect(
-        find.byKey(const ValueKey('login_snackbar_forgot_password_info')),
-        findsNothing,
-      );
-    });
+        // Assert: Verifica a SnackBar informativa.
+        expect(
+          find.byKey(LoginPage.snackbarForgotPasswordButtonKey),
+          findsOneWidget,
+        );
+        expect(find.text(kForgotPasswordSnackbarMsg), findsOneWidget);
+
+        // Act: Aguarda a SnackBar desaparecer automaticamente (duração padrão de 4s).
+        await tester.pumpAndSettle(const Duration(seconds: 4));
+
+        // Assert: Verifica se a SnackBar desapareceu.
+        expect(
+          find.byKey(LoginPage.snackbarForgotPasswordButtonKey),
+          findsNothing,
+        );
+      },
+    );
   });
 }

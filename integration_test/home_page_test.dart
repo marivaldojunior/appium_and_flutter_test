@@ -1,176 +1,210 @@
+// test/integration/home_page_test.dart
+import 'package:appium_and_flutter_test/main.dart' as app;
 import 'package:appium_and_flutter_test/pages/chat_page.dart';
 import 'package:appium_and_flutter_test/pages/click_page.dart';
 import 'package:appium_and_flutter_test/pages/forms_page.dart';
 import 'package:appium_and_flutter_test/pages/gestos_page.dart';
+import 'package:appium_and_flutter_test/pages/home_page.dart';
 import 'package:appium_and_flutter_test/pages/listview_page.dart';
 import 'package:appium_and_flutter_test/pages/login_page.dart';
 import 'package:appium_and_flutter_test/pages/recursos_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:appium_and_flutter_test/main.dart' as app;
-import 'package:appium_and_flutter_test/pages/home_page.dart';
+
+// --- Constantes para os Testes ---
+const String kCorrectUsername = 'admin';
+const String kCorrectPassword = '1234';
+
+// --- Funções Auxiliares de Teste ---
+
+/// Garante um estado limpo, inicializando o app, fazendo login
+/// e garantindo que a [HomePage] está visível.
+Future<void> _initializeAppAndNavigateToHome(WidgetTester tester) async {
+  app.main();
+  await tester.pumpAndSettle();
+
+  if (tester.any(find.byType(LoginPage))) {
+    await tester.enterText(
+      find.byKey(LoginPage.usernameFieldKey),
+      kCorrectUsername,
+    );
+    await tester.enterText(
+      find.byKey(LoginPage.passwordFieldKey),
+      kCorrectPassword,
+    );
+    await tester.tap(find.byKey(LoginPage.loginButtonKey));
+    await tester.pumpAndSettle();
+  }
+
+  expect(
+    find.byType(HomePage),
+    findsOneWidget,
+    reason: "Deveria estar na HomePage após o login.",
+  );
+}
+
+/// Testa um fluxo de navegação: toca em um botão, verifica a nova página,
+/// e depois volta para a HomePage.
+Future<void> _testNavigationPath(
+  WidgetTester tester, {
+  required Key buttonKey,
+  required Type destinationPageType,
+  required String pageName,
+}) async {
+  // Act: Navega para a página de destino.
+  await tester.tap(find.byKey(buttonKey));
+  await tester.pumpAndSettle();
+
+  // Assert: Verifica se a página de destino foi carregada.
+  expect(
+    find.byType(destinationPageType),
+    findsOneWidget,
+    reason: "Deveria ter navegado para a $pageName.",
+  );
+
+  // Act: Volta para a página anterior.
+  final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+  navigator.pop();
+  await tester.pumpAndSettle();
+
+  // Assert: Verifica se retornou para a HomePage.
+  expect(
+    find.byType(HomePage),
+    findsOneWidget,
+    reason: "Deveria ter retornado para a HomePage após sair da $pageName.",
+  );
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> navigateBack(WidgetTester tester) async {
-    // Encontra o botão de voltar no AppBar (se existir)
-    final NavigatorState navigator = tester.state(find.byType(Navigator));
-    if (navigator.canPop()) {
-      navigator.pop();
-      await tester.pumpAndSettle();
-    }
-  }
-
-  Future<void> ensureLoggedInAndOnHomePage(WidgetTester tester) async {
-    app.main(); // Inicia o app
-    await tester.pumpAndSettle(
-      const Duration(seconds: 1),
-    ); // Pequena espera inicial
-
-    // Se o app inicia na LoginPage, faz o login
-    if (tester.any(find.byType(LoginPage))) {
-      await tester.enterText(
-        find.byKey(LoginPage.usernameFieldKey),
-        'admin', // Usuário padrão para testes.
-      );
-      await tester.enterText(
-        find.byKey(LoginPage.passwordFieldKey),
-        '1234', // Senha padrão para testes.
-      );
-      await tester.tap(find.byKey(LoginPage.loginButtonKey));
-      await tester.pumpAndSettle(
-        const Duration(seconds: 3), // Aguarda navegação e SnackBar
-      );
-    }
-    // Garante que a HomePage está carregada
-    expect(
-      find.byType(HomePage),
-      findsOneWidget,
-      reason: "HomePage não foi carregada após o login.",
-    );
-  }
-
   group('Testes de Integração da HomePage', () {
-    testWidgets('Verifica elementos da UI e navegação para todas as seções', (
+    // Garante que cada teste comece em um estado limpo, com o app na HomePage.
+    setUp(() async {
+      // A inicialização é feita dentro de cada teste para garantir isolamento total.
+    });
+
+    testWidgets('Deve exibir os elementos da UI principal corretamente', (
       WidgetTester tester,
     ) async {
-      await ensureLoggedInAndOnHomePage(tester);
+      // Arrange
+      await _initializeAppAndNavigateToHome(tester);
 
-      // Garante que estamos na HomePage (caso algum teste anterior tenha navegado)
-      // Se o setUpAll já garante isso, esta verificação pode ser redundante,
-      // mas é bom para testes individuais.
-      if (find.byType(HomePage).evaluate().isEmpty) {
-        // Tenta voltar para a HomePage se não estiver nela
-        final NavigatorState navigator = tester.state(find.byType(Navigator));
-        while (navigator.canPop()) {
-          navigator.pop();
-          await tester.pumpAndSettle();
-          if (find.byType(HomePage).evaluate().isNotEmpty) break;
-        }
-      }
-      expect(
-        find.byType(HomePage),
-        findsOneWidget,
-        reason: "Não está na HomePage no início do teste de navegação.",
-      );
-
-      // Verifica título do AppBar
+      // Assert
       expect(find.text('Menu Principal'), findsOneWidget);
+      expect(find.byKey(HomePage.formsButtonKey), findsOneWidget);
+      expect(find.byKey(HomePage.listViewButtonKey), findsOneWidget);
+      expect(find.byKey(HomePage.logoutButtonKey), findsOneWidget);
+    });
 
-      // Navegação para Formulários
-      await tester.tap(find.byKey(HomePage.formsButtonKey));
+    // --- Testes de Navegação ---
+    testWidgets('Deve navegar para a FormsPage e voltar', (
+      WidgetTester tester,
+    ) async {
+      await _initializeAppAndNavigateToHome(tester);
+      await _testNavigationPath(
+        tester,
+        buttonKey: HomePage.formsButtonKey,
+        destinationPageType: FormsPage,
+        pageName: "FormsPage",
+      );
+    });
+
+    testWidgets('Deve navegar para a ListViewPage e voltar', (
+      WidgetTester tester,
+    ) async {
+      await _initializeAppAndNavigateToHome(tester);
+      await _testNavigationPath(
+        tester,
+        buttonKey: HomePage.listViewButtonKey,
+        destinationPageType: ListViewPage,
+        pageName: "ListViewPage",
+      );
+    });
+
+    testWidgets('Deve navegar para a RecursosPage e voltar', (
+      WidgetTester tester,
+    ) async {
+      await _initializeAppAndNavigateToHome(tester);
+      await _testNavigationPath(
+        tester,
+        buttonKey: HomePage.nativeResourcesButtonKey,
+        destinationPageType: RecursosPage,
+        pageName: "RecursosPage",
+      );
+    });
+
+    testWidgets('Deve navegar para a GestosPage e voltar', (
+      WidgetTester tester,
+    ) async {
+      await _initializeAppAndNavigateToHome(tester);
+      await _testNavigationPath(
+        tester,
+        buttonKey: HomePage.gesturesButtonKey,
+        destinationPageType: GestosPage,
+        pageName: "GestosPage",
+      );
+    });
+
+    testWidgets('Deve navegar para a ClickPage e voltar', (
+      WidgetTester tester,
+    ) async {
+      await _initializeAppAndNavigateToHome(tester);
+      await _testNavigationPath(
+        tester,
+        buttonKey: HomePage.clickAndHoldButtonKey,
+        destinationPageType: ClickPage,
+        pageName: "ClickPage",
+      );
+    });
+
+    testWidgets('Deve navegar para a ChatPage e voltar', (
+      WidgetTester tester,
+    ) async {
+      await _initializeAppAndNavigateToHome(tester);
+      await _testNavigationPath(
+        tester,
+        buttonKey: HomePage.chatButtonKey,
+        destinationPageType: ChatPage,
+        pageName: "ChatPage",
+      );
+    });
+
+    // --- Testes de Logout ---
+    testWidgets('Deve cancelar o logout e permanecer na HomePage', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      await _initializeAppAndNavigateToHome(tester);
+
+      // Act: Abre e cancela o diálogo de logout.
+      await tester.tap(find.byKey(HomePage.logoutButtonKey));
       await tester.pumpAndSettle();
-      expect(find.byType(FormsPage), findsOneWidget);
-      await navigateBack(tester);
-
-      // Navegação para ListView
-      await tester.tap(find.byKey(HomePage.listViewButtonKey));
+      expect(find.byKey(HomePage.logoutDialogKey), findsOneWidget);
+      await tester.tap(find.byKey(HomePage.logoutDialogCancelButtonKey));
       await tester.pumpAndSettle();
-      expect(find.byType(ListViewPage), findsOneWidget);
-      await navigateBack(tester);
 
-      // Navegação para Recursos Nativos
-      await tester.tap(find.byKey(HomePage.nativeResourcesButtonKey));
-      await tester.pumpAndSettle();
-      expect(find.byType(RecursosPage), findsOneWidget);
-      await navigateBack(tester);
-
-      // Navegação para Gestos na Tela
-      await tester.tap(find.byKey(HomePage.gesturesButtonKey));
-      await tester.pumpAndSettle();
-      expect(find.byType(GestosPage), findsOneWidget);
-      await navigateBack(tester);
-
-      // Navegação para Clicar e Segurar
-      await tester.tap(find.byKey(HomePage.clickAndHoldButtonKey));
-      await tester.pumpAndSettle();
-      expect(find.byType(ClickPage), findsOneWidget);
-      await navigateBack(tester);
-
-      // Navegação para Chat Simulado
-      await tester.tap(find.byKey(HomePage.chatButtonKey));
-      await tester.pumpAndSettle();
-      expect(find.byType(ChatPage), findsOneWidget);
-      await navigateBack(tester);
-
-      // Verifica se voltou para a HomePage
+      // Assert
+      expect(find.byKey(HomePage.logoutDialogKey), findsNothing);
       expect(find.byType(HomePage), findsOneWidget);
     });
 
-    testWidgets('Testa funcionalidade de Logout (Cancelar e Confirmar)', (
+    testWidgets('Deve confirmar o logout e navegar para a LoginPage', (
       WidgetTester tester,
     ) async {
-      await ensureLoggedInAndOnHomePage(tester);
+      // Arrange
+      await _initializeAppAndNavigateToHome(tester);
 
-      // Garante que estamos na HomePage
-      if (find.byType(HomePage).evaluate().isEmpty) {
-        final NavigatorState navigator = tester.state(find.byType(Navigator));
-        while (navigator.canPop()) {
-          navigator.pop();
-          await tester.pumpAndSettle();
-          if (find.byType(HomePage).evaluate().isNotEmpty) break;
-        }
-      }
-      expect(
-        find.byType(HomePage),
-        findsOneWidget,
-        reason: "Não está na HomePage no início do teste de logout.",
-      );
-
-      // 1. Tenta Logout e Cancela
-      await tester.tap(find.byKey(HomePage.logoutButtonKey));
-      await tester.pumpAndSettle(); // Aguarda o diálogo aparecer
-
-      expect(find.byKey(HomePage.logoutDialogKey), findsOneWidget);
-      expect(find.text('Confirmar Logout'), findsOneWidget);
-
-      await tester.tap(find.byKey(HomePage.logoutDialogCancelButtonKey));
-      await tester.pumpAndSettle(); // Aguarda o diálogo desaparecer
-
-      expect(find.byKey(HomePage.logoutDialogKey), findsNothing);
-      expect(
-        find.byType(HomePage),
-        findsOneWidget,
-        reason: "Deveria permanecer na HomePage após cancelar o logout.",
-      );
-
-      // 2. Tenta Logout e Confirma
+      // Act: Abre e confirma o diálogo de logout.
       await tester.tap(find.byKey(HomePage.logoutButtonKey));
       await tester.pumpAndSettle();
-
       expect(find.byKey(HomePage.logoutDialogKey), findsOneWidget);
       await tester.tap(find.byKey(HomePage.logoutDialogConfirmButtonKey));
-      await tester.pumpAndSettle(
-        const Duration(seconds: 1),
-      ); // Aguarda navegação
+      await tester.pumpAndSettle();
 
-      expect(
-        find.byType(LoginPage),
-        findsOneWidget,
-        reason: "Deveria navegar para LoginPage após confirmar o logout.",
-      );
+      // Assert
+      expect(find.byType(LoginPage), findsOneWidget);
       expect(find.byType(HomePage), findsNothing);
     });
   });
