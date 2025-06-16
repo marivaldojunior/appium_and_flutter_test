@@ -26,12 +26,12 @@ HOME_PAGE_INDICATOR_KEY = 'home_page_app_bar_title' # Ex: ValueKey('home_page_ap
 HOME_CLICK_PAGE_BUTTON_KEY = 'home_page_click_and_hold_button' # Ex: ValueKey('home_page_click_and_hold_button')
 
 # ClickPage
-CLICK_PAGE_APPBAR_TITLE_KEY = 'clickPage_appBar_title' # Ex: ValueKey('clickPage_appBar_title')
-CLICK_PAGE_DOUBLE_TAP_CARD_KEY = 'clickPage_double_tap_card'
-CLICK_PAGE_LONG_PRESS_CARD_KEY = 'clickPage_long_press_card'
+CLICK_PAGE_APPBAR_TITLE_KEY = 'click_page_app_bar_title' # Ex: ValueKey('clickPage_appBar_title')
+CLICK_PAGE_DOUBLE_TAP_CARD_KEY = 'click_page_double_tap_card'
+CLICK_PAGE_LONG_PRESS_CARD_KEY = 'click_page_long_press_card'
 
 # AlertDialog (Flutter AlertDialog)
-CLICK_PAGE_ALERT_OK_BUTTON_KEY = 'clickPage_alert_dialog_ok_button' # ValueKey para o botão OK do AlertDialog
+CLICK_PAGE_ALERT_OK_BUTTON_KEY = 'click_page_alert_dialog_ok_button' # ValueKey para o botão OK do AlertDialog
 
 # Textos dentro do AlertDialog (para verificação)
 TEXT_ALERT_DOUBLE_TAP_TITLE = "Duplo Clique!"

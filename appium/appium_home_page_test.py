@@ -43,7 +43,7 @@ FORMS_PAGE_INDICATOR_KEY = 'forms_app_bar_title' # Ex: ValueKey('forms_app_bar_t
 LISTVIEW_PAGE_INDICATOR_KEY = 'list_view_page_list_view' # Ex: ValueKey('list_view_page_list_view')
 RECURSOS_PAGE_INDICATOR_KEY = 'recursos_page_app_bar_title' # Ex: ValueKey('recursos_page_app_bar_title')
 GESTOS_PAGE_INDICATOR_KEY = 'gestos_page_app_bar_title' # Ex: ValueKey('gestos_page_app_bar_title')
-CLICK_PAGE_INDICATOR_KEY = 'clickPage_appBar_title' # Ex: ValueKey('clickPage_appBar_title')
+CLICK_PAGE_INDICATOR_KEY = 'click_page_app_bar_title' # Ex: ValueKey('click_page_app_bar_title')
 CHAT_PAGE_INDICATOR_KEY = 'chat_page_app_bar_title' # Ex: ValueKey('chat_page_app_bar_title')
 
 class HomePageTests(unittest.TestCase):

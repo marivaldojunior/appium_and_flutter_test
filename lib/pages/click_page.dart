@@ -47,7 +47,6 @@ class ClickPage extends StatelessWidget {
             GestureDetector(
               key: doubleTapCardKey,
               onDoubleTap: () {
-                print('Duplo clique detectado!');
                 _showAlertDialog(
                   context,
                   'Duplo Clique!',
@@ -91,7 +90,6 @@ class ClickPage extends StatelessWidget {
             GestureDetector(
               key: longPressCardKey,
               onLongPress: () {
-                print('Clique longo detectado!');
                 _showAlertDialog(
                   context,
                   'Clique Longo!',
