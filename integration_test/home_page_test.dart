@@ -33,11 +33,11 @@ void main() {
     if (tester.any(find.byType(LoginPage))) {
       await tester.enterText(
         find.byKey(LoginPage.usernameFieldKey),
-        'admin', // Padronizando com outros testes
+        'admin', // Usuário padrão para testes.
       );
       await tester.enterText(
         find.byKey(LoginPage.passwordFieldKey),
-        '1234', // Padronizando com outros testes
+        '1234', // Senha padrão para testes.
       );
       await tester.tap(find.byKey(LoginPage.loginButtonKey));
       await tester.pumpAndSettle(

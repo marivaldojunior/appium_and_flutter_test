@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:appium_and_flutter_test/main.dart' as app;
-import 'package:appium_and_flutter_test/pages/home_page.dart'; // Adicionado
-import 'package:appium_and_flutter_test/pages/login_page.dart'; // Adicionado
+import 'package:appium_and_flutter_test/pages/home_page.dart'; // Import da HomePage para navegação.
+import 'package:appium_and_flutter_test/pages/login_page.dart'; // Import da LoginPage para o fluxo de login.
 import 'package:appium_and_flutter_test/pages/forms_page.dart';
 import 'package:intl/intl.dart';
 
@@ -19,11 +19,11 @@ void main() {
     if (tester.any(find.byType(LoginPage))) {
       await tester.enterText(
         find.byKey(LoginPage.usernameFieldKey),
-        'admin', // Use um usuário válido padrão para testes
+        'admin', // Usuário padrão para testes.
       );
       await tester.enterText(
         find.byKey(LoginPage.passwordFieldKey),
-        '1234', // Use uma senha válida padrão para testes
+        '1234', // Senha padrão para testes.
       );
       await tester.tap(find.byKey(LoginPage.loginButtonKey));
       // Aguarda o login, navegação para HomePage e desaparecimento do SnackBar
@@ -40,7 +40,7 @@ void main() {
     // Navega para FormsPage
     await tester.tap(
       find.byKey(HomePage.formsButtonKey),
-    ); // Usa a key do botão na HomePage
+    ); // Utiliza a ValueKey do botão na HomePage para navegação.
     await tester.pumpAndSettle(); // Aguarda a navegação
   }
 

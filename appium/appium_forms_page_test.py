@@ -12,7 +12,8 @@ from appium_flutter_finder.flutter_finder import FlutterFinder
 
 # Configurações do Appium e do Aplicativo (ajuste conforme necessário)
 APPIUM_HOST = 'http://127.0.0.1:4723'
-APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # IMPORTANTE: Atualize este caminho
+# Caminho para o arquivo APK ou APP do aplicativo em teste.
+APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # Este caminho deve ser atualizado para o local do arquivo do aplicativo.
 
 # --- Chaves dos Elementos Flutter para Navegação ---
 # LoginPage
@@ -56,25 +57,25 @@ class FormsPageTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Configuração do driver do Appium."""
-        # Ajuste as capacidades conforme necessário para seu ambiente.
+        """Configuração inicial do driver do Appium para a suíte de testes."""
+        # Capacidades desejadas para a sessão do Appium.
         capabilities = dict(
-            platformName='Android',  # ou 'iOS'
-            deviceName='Android Emulator', # Valor comum nos seus testes
-            appPackage='com.example.appium_and_flutter_test', # Pacote do seu app
-            appActivity='.MainActivity', # Atividade principal do seu app
-            automationName='Flutter'  # Usado para testes Flutter
+            platformName='Android',  # Plataforma do dispositivo (Android ou iOS).
+            deviceName='Android Emulator', # Nome do dispositivo ou emulador.
+            appPackage='com.example.appium_and_flutter_test', # Package name do aplicativo.
+            appActivity='.MainActivity', # Activity principal do aplicativo.
+            automationName='Flutter'  # Nome do driver de automação (Flutter para apps Flutter).
         )
         options = AppiumOptions().load_capabilities(capabilities)
-        # Adicionando outras opções comuns nos seus testes:
+        # Configurações adicionais da sessão.
         options.set_capability('app-debug.apk', "D:\\repos\\appium_and_flutter_test\\build\\app\\outputs\\flutter-apk\\app-debug.apk")
         options.set_capability('retryBackoffTime', 500)
         options.set_capability('maxRetryCount', 3)
-        options.set_capability('newCommandTimeout', 120) # Ou outro valor dependendo da complexidade da página
+        options.set_capability('newCommandTimeout', 120) # Timeout para novos comandos.
 
-        cls.driver = webdriver.Remote('http://127.0.0.1:4723', options=options) # URL do servidor Appium
-        cls.wait = WebDriverWait(cls.driver, 30)  # Timeout comum nos seus testes
-        cls.finder = FlutterFinder() # Adicionado, pois é usado em todos os seus testes Appium/Flutter
+        cls.driver = webdriver.Remote(APPIUM_HOST, options=options)
+        cls.wait = WebDriverWait(cls.driver, 30)  # Tempo máximo de espera para elementos.
+        cls.finder = FlutterFinder() # Instância do FlutterFinder para localizar elementos Flutter.
 
     @classmethod
     def tearDownClass(cls):
@@ -111,7 +112,7 @@ class FormsPageTests(unittest.TestCase):
         time.sleep(0.2)
 
     def _navigate_to_forms_page(self, username='admin', password='1234'):
-        """Navega para a FormsPage, fazendo login se necessário."""
+        """Navega para a FormsPage, realizando o login se estiver na LoginPage."""
         time.sleep(1) # Pausa inicial
 
         # Se estiver na LoginPage, faz login
@@ -163,7 +164,7 @@ class FormsPageTests(unittest.TestCase):
         time.sleep(1) # Esperar o DatePicker nativo abrir
 
         # Interagir com o DatePicker nativo (os seletores podem variar dependendo do OS e versão)
-        # Este é um exemplo para Android. Pode precisar de ajuste.
+        # Exemplo para Android; pode precisar de ajuste para outras plataformas ou versões do OS.
         try:
             # Tenta clicar no botão "OK" padrão do Android DatePicker
             ok_button = self.wait.until(
@@ -175,7 +176,7 @@ class FormsPageTests(unittest.TestCase):
             # Como fallback, tenta pressionar "Enter" ou uma ação de "done" se o teclado estiver ativo
             try:
                 self.driver.press_keycode(66) # KEYCODE_ENTER
-            except:
+            except Exception:
                 # Se tudo falhar, apenas continue, o teste pode não validar a data corretamente
                 print("Fallback do DatePicker: Não foi possível confirmar a data.")
         time.sleep(1)
@@ -183,7 +184,7 @@ class FormsPageTests(unittest.TestCase):
     def test_03_toggle_switch(self):
         subscribe_switch = self._find_element_by_value_key(SUBSCRIBE_SWITCH_KEY)
         # Verifica o estado atual pelo widget (se possível, ou assume um estado inicial)
-        # Para este exemplo, vamos apenas clicar para alternar
+        # Neste exemplo, apenas clica para alternar o estado.
         self._tap_element(subscribe_switch)
         time.sleep(0.5)
         # Poderia adicionar uma asserção aqui se houvesse uma forma de ler o estado do switch via FlutterFinder
@@ -209,11 +210,10 @@ class FormsPageTests(unittest.TestCase):
         time.sleep(1) # Esperar o dropdown abrir
 
         # Para selecionar um item, precisamos de uma chave para o item do dropdown.
-        # No código Dart, os DropdownMenuItems não têm chaves individuais.
-        # A melhor abordagem seria adicionar ValueKeys aos DropdownMenuItems.
+        # A melhor abordagem é adicionar ValueKeys aos DropdownMenuItems no código Flutter.
         # Ex: DropdownMenuItem(key: ValueKey('country_item_Brasil'), value: 'Brasil', child: Text('Brasil'))
         # Se não for possível, a seleção pode ser mais frágil, dependendo de texto ou ordem.
-
+        
         # Tentativa de selecionar por texto (pode ser menos robusto)
         # Este é um exemplo e pode precisar de ajustes ou ValueKeys no app Flutter.
         try:
@@ -221,7 +221,7 @@ class FormsPageTests(unittest.TestCase):
             # No entanto, itens de dropdown são frequentemente renderizados em uma sobreposição.
             # Uma abordagem mais robusta é usar ValueKey para o item específico.
             # Se ValueKeys não estiverem disponíveis, procurar por texto é uma alternativa.
-            # Exemplo: self.finder.by_text(TEST_COUNTRY_BRASIL)
+            # Exemplo de busca por texto: self.finder.by_text(TEST_COUNTRY_BRASIL)
             # Mas isso pode não funcionar se o texto não for único ou estiver em uma camada diferente.
 
             # Assumindo que ValueKeys foram adicionadas como 'country_item_Brasil'
@@ -235,13 +235,12 @@ class FormsPageTests(unittest.TestCase):
             # )
             # self._tap_element(brasil_option)
 
-            # Para este exemplo, vamos simular um clique em um item que *deveria* ter uma chave.
-            # Se o seu DropdownMenuItem para 'Brasil' tiver uma ValueKey, use-a aqui.
+            # Simula um clique em um item que deveria ter uma ValueKey.
+            # Se o DropdownMenuItem para 'Brasil' tiver uma ValueKey, use-a aqui.
             # Por exemplo, se a key for ValueKey('Brasil'):
             # brasil_option = self._find_element_by_value_key(TEST_COUNTRY_BRASIL)
             # self._tap_element(brasil_option)
 
-            # Como fallback, se não houver chaves nos itens, esta parte será difícil de automatizar de forma robusta.
             # Uma alternativa seria usar coordenadas relativas ou gestos de rolagem e depois clicar.
             # Por enquanto, vamos assumir que o primeiro item é clicável ou que você adicionará chaves.
             # Este é um ponto que frequentemente requer adaptação específica ao app.
@@ -272,7 +271,7 @@ class FormsPageTests(unittest.TestCase):
 
     def test_07_submit_form(self):
         # Pode ser necessário rolar para baixo para que o botão de submit esteja visível
-        # self.driver.execute_script('flutter:scrollIntoView', self.finder.by_value_key(SUBMIT_BUTTON_KEY), {'alignment': 0.5})
+        # Exemplo de rolagem específica para um elemento: self.driver.execute_script('flutter:scrollIntoView', self.finder.by_value_key(SUBMIT_BUTTON_KEY), {'alignment': 0.5})
         # time.sleep(0.5)
         
         # Tentar uma rolagem genérica se o botão não estiver visível
@@ -280,7 +279,7 @@ class FormsPageTests(unittest.TestCase):
             submit_button = self._find_element_by_value_key(SUBMIT_BUTTON_KEY, timeout=5)
         except:
             print("Botão de submit não encontrado inicialmente, tentando rolar.")
-            # Rolagem simples (pode precisar de ajuste de coordenadas ou usar flutter:scroll)
+            # Rolagem simples (pode precisar de ajuste de coordenadas ou usar flutter:scrollIntoView).
             action = TouchAction(self.driver)
             window_size = self.driver.get_window_size()
             start_x = window_size['width'] / 2
@@ -293,10 +292,9 @@ class FormsPageTests(unittest.TestCase):
         self._tap_element(submit_button)
         time.sleep(1) # Esperar a mensagem de snackbar
 
-        # Verificar a snackbar (exemplo, pode precisar de ajuste no seletor)
+        # Verificar a snackbar.
         # A snackbar pode não ser um widget Flutter diretamente acessível com ValueKey.
         # Pode ser necessário usar XPath ou outros localizadores nativos se for um overlay nativo,
-        # ou flutter:waitFor se for um widget Flutter.
         try:
             snackbar_text = "Formulário enviado com sucesso!"
             # Tentar encontrar por texto (pode ser frágil)
@@ -316,9 +314,9 @@ class FormsPageTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    if APP_PATH == "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI":
+    if "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" in APP_PATH: # Verificação mais genérica
         print("ERRO: A variável APP_PATH não foi configurada no script.")
-        print("Por favor, edite o arquivo e defina o caminho para o seu APK/APP.")
+        print(f"Por favor, edite o arquivo {__file__} e defina o caminho para o seu APK/APP.")
     else:
         suite = unittest.TestSuite()
         # Adicionar testes na ordem desejada
@@ -331,6 +329,6 @@ if __name__ == '__main__':
         suite.addTest(FormsPageTests('test_07_submit_form'))
 
         runner = unittest.TextTestRunner(verbosity=2)
-        print(f"Iniciando testes para o app: {APP_PATH}")
-        print(f"Conectando ao servidor Appium em: {APPIUM_HOST}")
+        print(f"Iniciando testes da FormsPage para o app: {APP_PATH}")
+        print(f"Conectando ao servidor Appium em: {APPIUM_HOST}...")
         runner.run(suite)

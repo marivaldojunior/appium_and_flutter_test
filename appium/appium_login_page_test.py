@@ -10,17 +10,17 @@ import time
 class LoginPageTests(unittest.TestCase):
 
     def setUp(self): 
-        """Configuração do driver do Appium."""
-        # Ajuste as capacidades conforme necessário para seu ambiente.
+        """Configuração do driver do Appium para cada teste."""
+        # As capacidades devem ser ajustadas conforme o ambiente de teste.
         capabilities = dict(
-            platformName='Android',  # ou 'iOS'
-            deviceName='NomeDoSeuDispositivoOuEmulador',
-            appPackage='com.seuapp.pacote', # Substitua pelo pacote do seu app
-            appActivity='com.seuapp.atividade.Principal', # Substitua pela atividade principal
-            automationName='UiAutomator2'  # ou 'XCUITest' para iOS
+            platformName='Android',  # Plataforma (ex: Android, iOS).
+            deviceName='NomeDoSeuDispositivoOuEmulador', # Nome do dispositivo ou emulador.
+            appPackage='com.seuapp.pacote', # Package name do aplicativo.
+            appActivity='com.seuapp.atividade.Principal', # Activity principal do aplicativo.
+            automationName='UiAutomator2'  # Driver de automação (UiAutomator2 para Android, XCUITest para iOS).
         )
         options = AppiumOptions().load_capabilities(capabilities)
-        self.driver = webdriver.Remote('http://localhost:4723/wd/hub', options=options)
+        self.driver = webdriver.Remote('http://127.0.0.1:4723/wd/hub', options=options) # URL do servidor Appium.
         self.wait = WebDriverWait(self.driver, 10)  # Espera até 10 segundos
 
     def tearDown(self):
@@ -30,17 +30,17 @@ class LoginPageTests(unittest.TestCase):
 
     def test_ui_inicial_e_validacoes(self):
         """Verifica a UI inicial e as validações de campos vazios."""
-        # Assumindo que os IDs dos elementos são consistentes entre Flutter e Appium.
-        # Se necessário, use outros localizadores como XPath, accessibility_id, etc.
+        # Localiza os elementos da UI inicial.
+        # Os localizadores (By.ID, XPath, etc.) devem corresponder aos elementos no aplicativo.
         self.wait.until(EC.presence_of_element_located((By.ID, "usernameField")))
         self.wait.until(EC.presence_of_element_located((By.ID, "passwordField")))
         self.wait.until(EC.presence_of_element_located((By.ID, "loginButton")))
         self.wait.until(EC.presence_of_element_located((By.ID, "forgotPasswordButton")))
-        #  Verificação do título do AppBar pode ser mais complexa dependendo da implementação.
+        # A verificação do título do AppBar pode requerer um localizador específico.
 
         # Tenta logar com campos vazios
         self.driver.find_element(By.ID, "loginButton").click()
-
+        
         # Verifica mensagens de validação (ajuste os IDs ou localizadores conforme necessário)
         #  A lógica para verificar mensagens de erro pode variar dependendo de como elas são exibidas (e.g., SnackBar, alertas).
         #  Exemplo genérico:
@@ -50,7 +50,7 @@ class LoginPageTests(unittest.TestCase):
         #  except:
         #      self.fail("Mensagem de erro para usuário não encontrada.")
         #
-        #  Repita a lógica para a senha.
+        #  A mesma lógica de verificação de erro deve ser aplicada para o campo de senha.
 
     def test_login_credenciais_incorretas(self):
         """Login com credenciais incorretas exibe diálogo de erro."""
@@ -61,29 +61,29 @@ class LoginPageTests(unittest.TestCase):
         self.driver.find_element(By.ID, "loginButton").click()
 
         # Verifica o diálogo de erro
-        alert = self.wait.until(EC.alert_is_present())
-        self.assertEqual(alert.text, "Usuário ou senha incorretos.") # Ajuste a mensagem conforme necessário
-        alert.accept() # ou dismiss() dependendo do botão para fechar
+        alert = self.wait.until(EC.alert_is_present()) # Espera o alerta nativo aparecer.
+        self.assertEqual(alert.text, "Usuário ou senha incorretos.") # A mensagem de erro deve ser verificada.
+        alert.accept() # Clica no botão "OK" (ou equivalente) do alerta.
 
     def test_login_credenciais_corretas(self):
         """Login com credenciais corretas navega para HomePage e exibe SnackBar."""
         username_field = self.driver.find_element(By.ID, "usernameField")
         password_field = self.driver.find_element(By.ID, "passwordField")
-        username_field.send_keys("admin")  # Substitua pelas credenciais corretas
-        password_field.send_keys("1234")  # Substitua pelas credenciais corretas
+        username_field.send_keys("admin")  # Credenciais corretas para o teste.
+        password_field.send_keys("1234")  # Credenciais corretas para o teste.
         self.driver.find_element(By.ID, "loginButton").click()
 
-        # Verifica SnackBar de sucesso (adapte a lógica de localização do SnackBar)
+        # Verifica SnackBar de sucesso. A localização do SnackBar pode variar.
         # Exemplo com espera por um texto específico:
         # try:
         #     snackbar_text = self.wait.until(EC.presence_of_element_located((By.ID, "snackbarText"))).text
         #     self.assertEqual(snackbar_text, "Login bem-sucedido!")
         # except:
         #     self.fail("SnackBar de sucesso não encontrado ou texto incorreto.")
-
-        # Verifica se navegou para HomePage (adapte o localizador para o HomePage)
+        
+        # Verifica se a navegação para a HomePage ocorreu.
         self.wait.until(EC.presence_of_element_located((By.ID, "homePageElement")))
-        #  Você também pode verificar a ausência de elementos da tela de login, se necessário.
+        #  Pode-se também verificar a ausência de elementos da LoginPage para confirmar a navegação.
 
     def test_botao_esqueceu_senha(self):
         """Botão "Esqueceu a senha?" exibe SnackBar informativo."""
@@ -97,7 +97,7 @@ class LoginPageTests(unittest.TestCase):
         # except:
         #     self.fail("SnackBar de informação não encontrado ou texto incorreto.")
 
-        time.sleep(2)  # Aguarda o SnackBar desaparecer (se necessário)
+        time.sleep(2)  # Pausa para permitir que o SnackBar desapareça, se aplicável.
 
 
 if __name__ == '__main__':

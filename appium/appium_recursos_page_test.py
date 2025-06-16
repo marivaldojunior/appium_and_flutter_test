@@ -12,7 +12,8 @@ from appium_flutter_finder.flutter_finder import FlutterFinder
 
 # Configurações do Appium e do Aplicativo
 APPIUM_HOST = 'http://127.0.0.1:4723'
-APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # IMPORTANTE: Atualize este caminho
+# Caminho para o arquivo APK ou APP do aplicativo em teste.
+APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # Este caminho deve ser atualizado para o local do arquivo do aplicativo.
 
 # Chaves dos elementos Flutter (ajuste conforme seu código Dart)
 # LoginPage
@@ -40,8 +41,8 @@ RECURSOS_PAGE_IMAGE_SOURCE_SHEET_GALLERY_OPTION_KEY = 'recursos_page_image_sourc
 RECURSOS_PAGE_IMAGE_SOURCE_SHEET_CAMERA_OPTION_KEY = 'recursos_page_image_source_sheet_camera_option'
 
 # Textos para SnackBars/mensagens (usados em XPaths)
-TEXT_NENHUMA_IMAGEM_SELECIONADA = "Nenhuma imagem selecionada" # Exatamente como no app
-TEXT_NENHUMA_IMAGEM_TIRADA = "Nenhuma imagem tirada."     # Exatamente como no app
+TEXT_NENHUMA_IMAGEM_SELECIONADA = "Nenhuma imagem selecionada" # Texto exibido quando nenhuma imagem é selecionada da galeria.
+TEXT_NENHUMA_IMAGEM_TIRADA = "Nenhuma imagem tirada."     # Texto exibido quando nenhuma imagem é capturada pela câmera.
 TEXT_SNACKBAR_PREFIX = "Snackbar: " # Se o seu app prefixar assim
 
 class RecursosPageTests(unittest.TestCase):
@@ -51,25 +52,25 @@ class RecursosPageTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Configuração do driver do Appium."""
-        # Ajuste as capacidades conforme necessário para seu ambiente.
+        """Configuração inicial do driver do Appium para a suíte de testes."""
+        # Capacidades desejadas para a sessão do Appium.
         capabilities = dict(
-            platformName='Android',  # ou 'iOS'
-            deviceName='Android Emulator', # Valor comum nos seus testes
-            appPackage='com.example.appium_and_flutter_test', # Pacote do seu app
-            appActivity='.MainActivity', # Atividade principal do seu app
-            automationName='Flutter'  # Usado para testes Flutter
+            platformName='Android',  # Plataforma do dispositivo (Android ou iOS).
+            deviceName='Android Emulator', # Nome do dispositivo ou emulador.
+            appPackage='com.example.appium_and_flutter_test', # Package name do aplicativo.
+            appActivity='.MainActivity', # Activity principal do aplicativo.
+            automationName='Flutter'  # Nome do driver de automação (Flutter para apps Flutter).
         )
         options = AppiumOptions().load_capabilities(capabilities)
-        # Adicionando outras opções comuns nos seus testes:
+        # Configurações adicionais da sessão.
         options.set_capability('app-debug.apk', "D:\\repos\\appium_and_flutter_test\\build\\app\\outputs\\flutter-apk\\app-debug.apk")
         options.set_capability('retryBackoffTime', 500)
         options.set_capability('maxRetryCount', 3)
-        options.set_capability('newCommandTimeout', 120) # Ou outro valor dependendo da complexidade da página
+        options.set_capability('newCommandTimeout', 120) # Timeout para novos comandos.
 
-        cls.driver = webdriver.Remote('http://127.0.0.1:4723', options=options) # URL do servidor Appium
-        cls.wait = WebDriverWait(cls.driver, 30)  # Timeout comum nos seus testes
-        cls.finder = FlutterFinder() # Adicionado, pois é usado em todos os seus testes Appium/Flutter
+        cls.driver = webdriver.Remote(APPIUM_HOST, options=options)
+        cls.wait = WebDriverWait(cls.driver, 30)  # Tempo máximo de espera para elementos.
+        cls.finder = FlutterFinder() # Instância do FlutterFinder para localizar elementos Flutter.
 
     @classmethod
     def tearDownClass(cls):
@@ -90,10 +91,9 @@ class RecursosPageTests(unittest.TestCase):
             return False
 
     def _is_text_present(self, text_string, timeout=5):
-        # Verifica se o texto está presente na tela. Pode ser usado para SnackBars.
+        # Verifica se um texto está presente na tela. Útil para SnackBars ou alertas.
         # Para elementos interativos, prefira ValueKey.
         # O FlutterFinder by_text pode ser menos performático.
-        # Se o SnackBar for um widget nativo sobreposto, pode ser necessário XPath.
         try:
             # Tenta primeiro com FlutterFinder (se o SnackBar for um widget Flutter)
             self.wait.until(EC.presence_of_element_located((AppiumBy.FLUTTER, self.finder.by_text(text_string))))
@@ -116,9 +116,7 @@ class RecursosPageTests(unittest.TestCase):
 
     def _wait_for_snackbar_message(self, message_text, timeout=5, present=True):
         """Espera por uma mensagem de SnackBar e verifica sua presença/ausência."""
-        # Tenta localizar o SnackBar pelo texto.
-        # Se o SnackBar tiver uma ValueKey, seria mais robusto.
-        # Para este exemplo, vamos assumir que o texto é suficiente.
+        # Tenta localizar o SnackBar pelo texto. Uma ValueKey no SnackBar seria mais robusta.
         # O FlutterFinder pode não encontrar textos em overlays nativos (SnackBars comuns).
         # Por isso, usamos XPath como fallback.
         start_time = time.time()
@@ -129,7 +127,7 @@ class RecursosPageTests(unittest.TestCase):
         self.fail(f"A mensagem do SnackBar '{message_text}' não ficou {'presente' if present else 'ausente'} dentro de {timeout}s.")
 
     def _navigate_to_recursos_page(self, username='admin', password='1234'):
-        """Navega para a RecursosPage, fazendo login se necessário."""
+        """Navega para a RecursosPage, realizando o login se estiver na LoginPage."""
         time.sleep(1)
 
         if self._is_element_present_by_value_key(LOGIN_USERNAME_FIELD_KEY, timeout=3):
@@ -156,8 +154,7 @@ class RecursosPageTests(unittest.TestCase):
         # 1. Verifica estado inicial da UI
         self._find_element_by_value_key(RECURSOS_PAGE_IMAGE_DISPLAY_AREA_KEY)
         self.assertTrue(self._is_text_present(TEXT_NENHUMA_IMAGEM_SELECIONADA),
-                        f"Texto '{TEXT_NENHUMA_IMAGEM_SELECIONADA}' não encontrado na área de imagem.")
-        # O ícone de busca geralmente é visual, não interativo com key.
+                        f"Texto '{TEXT_NENHUMA_IMAGEM_SELECIONADA}' não encontrado na área de imagem inicial.")
         # Se tiver uma key, adicione a verificação:
         # self.assertTrue(self._is_element_present_by_value_key('sua_image_search_icon_key'))
 
@@ -207,13 +204,13 @@ class RecursosPageTests(unittest.TestCase):
                          "Botão 'Remover Imagem' ainda deveria estar invisível.")
 
 if __name__ == '__main__':
-    if APP_PATH == "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI":
+    if "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" in APP_PATH: # Verificação mais genérica
         print("ERRO: A variável APP_PATH não foi configurada no script.")
-        print("Por favor, edite o arquivo e defina o caminho para o seu APK/APP.")
+        print(f"Por favor, edite o arquivo {__file__} e defina o caminho para o seu APK/APP.")
     else:
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(RecursosPageTests))
         runner = unittest.TextTestRunner(verbosity=2)
-        print(f"Iniciando testes para o app: {APP_PATH}")
-        print(f"Conectando ao servidor Appium em: {APPIUM_HOST}")
+        print(f"Iniciando testes da RecursosPage para o app: {APP_PATH}")
+        print(f"Conectando ao servidor Appium em: {APPIUM_HOST}...")
         runner.run(suite)

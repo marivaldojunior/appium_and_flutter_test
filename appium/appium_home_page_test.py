@@ -12,7 +12,8 @@ from appium_flutter_finder.flutter_finder import FlutterFinder
 
 # Configurações do Appium e do Aplicativo
 APPIUM_HOST = 'http://127.0.0.1:4723'
-APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # IMPORTANTE: Atualize este caminho
+# Caminho para o arquivo APK ou APP do aplicativo em teste.
+APP_PATH = "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" # Este caminho deve ser atualizado para o local do arquivo do aplicativo.
 
 # Chaves dos elementos Flutter (ajuste conforme seu código Dart)
 # LoginPage
@@ -52,25 +53,25 @@ class HomePageTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Configuração do driver do Appium."""
-        # Ajuste as capacidades conforme necessário para seu ambiente.
+        """Configuração inicial do driver do Appium para a suíte de testes."""
+        # Capacidades desejadas para a sessão do Appium.
         capabilities = dict(
-            platformName='Android',  # ou 'iOS'
-            deviceName='Android Emulator', # Valor comum nos seus testes
-            appPackage='com.example.appium_and_flutter_test', # Pacote do seu app
-            appActivity='.MainActivity', # Atividade principal do seu app
-            automationName='Flutter'  # Usado para testes Flutter
+            platformName='Android',  # Plataforma do dispositivo (Android ou iOS).
+            deviceName='Android Emulator', # Nome do dispositivo ou emulador.
+            appPackage='com.example.appium_and_flutter_test', # Package name do aplicativo.
+            appActivity='.MainActivity', # Activity principal do aplicativo.
+            automationName='Flutter'  # Nome do driver de automação (Flutter para apps Flutter).
         )
         options = AppiumOptions().load_capabilities(capabilities)
-        # Adicionando outras opções comuns nos seus testes:
+        # Configurações adicionais da sessão.
         options.set_capability('app-debug.apk', "D:\\repos\\appium_and_flutter_test\\build\\app\\outputs\\flutter-apk\\app-debug.apk")
         options.set_capability('retryBackoffTime', 500)
         options.set_capability('maxRetryCount', 3)
-        options.set_capability('newCommandTimeout', 120) # Ou outro valor dependendo da complexidade da página
+        options.set_capability('newCommandTimeout', 120) # Timeout para novos comandos.
 
-        cls.driver = webdriver.Remote('http://127.0.0.1:4723', options=options) # URL do servidor Appium
-        cls.wait = WebDriverWait(cls.driver, 30)  # Timeout comum nos seus testes
-        cls.finder = FlutterFinder() # Adicionado, pois é usado em todos os seus testes Appium/Flutter
+        cls.driver = webdriver.Remote(APPIUM_HOST, options=options)
+        cls.wait = WebDriverWait(cls.driver, 30)  # Tempo máximo de espera para elementos.
+        cls.finder = FlutterFinder() # Instância do FlutterFinder para localizar elementos Flutter.
 
     @classmethod
     def tearDownClass(cls):
@@ -211,13 +212,13 @@ class HomePageTests(unittest.TestCase):
         print("Teste de logout concluído.")
 
 if __name__ == '__main__':
-    if APP_PATH == "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI":
+    if "COLOQUE_O_CAMINHO_PARA_SEU_APP_AQUI" in APP_PATH: # Verificação mais genérica
         print("ERRO: A variável APP_PATH não foi configurada no script.")
-        print("Por favor, edite o arquivo e defina o caminho para o seu APK/APP.")
+        print(f"Por favor, edite o arquivo {__file__} e defina o caminho para o seu APK/APP.")
     else:
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(HomePageTests))
         runner = unittest.TextTestRunner(verbosity=2)
-        print(f"Iniciando testes para o app: {APP_PATH}")
-        print(f"Conectando ao servidor Appium em: {APPIUM_HOST}")
+        print(f"Iniciando testes da HomePage para o app: {APP_PATH}")
+        print(f"Conectando ao servidor Appium em: {APPIUM_HOST}...")
         runner.run(suite)
